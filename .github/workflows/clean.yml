@@ -1,0 +1,18 @@
+name: Clean GH Actions
+
+on:
+  workflow_call:
+    secrets:
+      CLEAN_TOKEN:
+
+jobs:
+  # Clean up github job
+  cleanup_actions:
+    name: Cleanup Actions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: igorjs/gh-actions-clean-workflow@5fa2e3a4fdd40e3e7098645a0b8df08624352e5e
+        with:
+          token: ${{ secrets.CLEAN_TOKEN }}
+          runs_to_keep: 1
+          runs_older_than: 0
