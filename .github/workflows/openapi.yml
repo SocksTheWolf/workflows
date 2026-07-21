@@ -20,22 +20,19 @@ on:
       download_uri:
         type: string
 
-concurrency:
-  group: openapi
-  cancel-in-progress: false
-
 defaults:
   run:
     shell: bash
+
+permissions:
+  contents: read
+  actions: write
 
 jobs:
   build_spec:
     name: Generate Spec
     runs-on: ubuntu-latest
     environment: openapi
-    permissions:
-      contents: read
-      actions: write
     steps:
       - name: Checkout
         uses: actions/checkout@v7.0.0
