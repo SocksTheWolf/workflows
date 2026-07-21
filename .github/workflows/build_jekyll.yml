@@ -14,6 +14,14 @@ on:
         required: true
       force_clear:
         type: boolean
+      should_clean:
+        type: boolean
+    secrets:
+      CLEANER_TOKEN:
+      PERSONAL_TOKEN:
+      CF_SECRET:
+      CF_ACCOUNT_ID:
+      CF_ZONE_ID:
 
 defaults:
   run:
@@ -28,6 +36,7 @@ jobs:
   cleaner:
     name: Actions Clean
     runs-on: ubuntu-latest
+    if: ${{ inputs.should_clean }}
     continue-on-error: true
     steps:
       - name: Clean GH Actions
