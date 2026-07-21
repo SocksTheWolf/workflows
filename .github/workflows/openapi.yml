@@ -20,8 +20,11 @@ on:
         type: boolean
       download_uri:
         type: string
+      clean_deploys:
+        type: boolean
     secrets:
       CLOUDFLARE_TOKEN:
+      GITHUB_TOKEN:
 
 defaults:
   run:
@@ -30,8 +33,21 @@ defaults:
 permissions:
   contents: read
   actions: write
+  deployments: write
 
 jobs:
+  clean_deploys:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    if: ${{ inputs.clean_deploys }}
+    name: Clean Old OpenAPI Deploys
+    steps:
+      - uses: strumwolf/delete-deployment-environment@035f6d27c8b8951729f4d71b2d3d6a7975139476
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          environment: openapi
+          onlyRemoveDeployments: true
+
   build_spec:
     name: Generate & Upload Spec
     runs-on: ubuntu-latest
