@@ -12,7 +12,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: igorjs/gh-actions-clean-workflow@5fa2e3a4fdd40e3e7098645a0b8df08624352e5e
+        id: clean
         with:
           token: ${{ secrets.CLEAN_TOKEN }}
           runs_to_keep: 1
           runs_older_than: 0
+      - name: Display metrics
+        run: |
+          echo "Total runs found: ${{ steps.clean.outputs.total-runs-found }}"
+          echo "Runs deleted: ${{ steps.clean.outputs.runs-deleted }}"
+          echo "Runs failed: ${{ steps.clean.outputs.runs-failed }}"
+          echo "API requests: ${{ steps.clean.outputs.total-api-requests }}"
+          echo "Rate limit hits: ${{ steps.clean.outputs.rate-limit-hits }}"
