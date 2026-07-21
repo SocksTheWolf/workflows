@@ -90,13 +90,13 @@ jobs:
         if: success()
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_SECRET }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CF_ACCOUNT_ID }}
         run: npm run deploy
         # Delete the cloudflare cache after deploy
       - name: Cloudflare Cache Cleaner
         if: success() && (steps.filter.outputs.clear_cache == 'true' || inputs.force_clear == 'true')
         uses: Cyb3r-Jak3/action-cloudflare-cache@6ebf798ade84e7ab7da249404e0c3b9aecf54f88
         with:
-          zone: ${{ secrets.CF_ZONE_ID }}
+          zone: ${{ vars.CF_ZONE_ID }}
           api_token: ${{ secrets.CF_SECRET }}
-          account_id: ${{ secrets.CF_ACCOUNT_ID }}
+          account_id: ${{ vars.CF_ACCOUNT_ID }}
