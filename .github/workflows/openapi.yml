@@ -69,7 +69,7 @@ jobs:
         uses: socksthewolf/cloudflare-upload-spec@4aa5efd32ce6fc898dcb794ccd7e3001568cce10
         with:
           zone_id: ${{ vars.CLOUDFLARE_ZONE }}
-          api_token: ${{ secrets.CLOUDFLARE_TOKEN }}
+          api_token: ${{ secrets.CLOUDFLARE_TOKEN || secrets.OPENAPI_TOKEN }}
           delete_others: true
       - name: Upload Spec as Artifact
         if: ${{ success() && steps.spec_check.outputs.has_file == 'true' }}
