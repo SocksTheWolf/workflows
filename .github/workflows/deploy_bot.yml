@@ -68,31 +68,31 @@ jobs:
       id: kill_bot
       continue-on-error: true
       if: steps.filter.outputs.deps_update_needed == 'true' || steps.filter.outputs.core_updated == 'true' || inputs.force_restart == 'true'
-      run: ssh staging 'cd $PROJECT_PATH && .runtime/kill.sh'
+      run: ssh staging $EXEC_STR
       env:
-        PROJECT_PATH: ${{ inputs.path }}
+        EXEC_STR: "cd ${{ inputs.path }} && .runtime/kill.sh"
 
     # We want to update the project regardless.
     - name: Sync Project
-      run: ssh staging 'cd $PROJECT_PATH && .runtime/pull.sh'
+      run: ssh staging $EXEC_STR
       env:
-        PROJECT_PATH: ${{ inputs.path }}
+        EXEC_STR: "cd ${{ inputs.path }} && .runtime/pull.sh"
 
     # attempt to update any python dependencies
     - name: Update Python Dependencies
       id: deps_update
       if: steps.filter.outputs.deps_update_needed == 'true'
       continue-on-error: false
-      run: ssh staging 'set -e && cd $PROJECT_PATH && .runtime/update.sh'
+      run: ssh staging $EXEC_STR
       env:
-        PROJECT_PATH: ${{ inputs.path }}
+        EXEC_STR: "set -e && cd ${{ inputs.path }} && .runtime/update.sh"
 
     # restart instances
     - name: Restart Instances
       if: ${{ always() && (steps.deps_update.conclusion == 'success' || steps.deps_update.outcome == 'skipped') && steps.kill_bot.conclusion == 'success' }}
-      run: ssh staging 'cd $PROJECT_PATH && .runtime/run.sh -d'
+      run: ssh staging $EXEC_STR
       env:
-        PROJECT_PATH: ${{ inputs.path }}
+        EXEC_STR: "cd ${{ inputs.path }} && .runtime/run.sh -d"
 
     # Remove the key once done
     - name: Kill SSH Add
