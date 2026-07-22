@@ -9,6 +9,10 @@
 name: Deploy Bots To Cloud via SSH
 on:
   workflow_call:
+    secrets:
+      SSH_HOST:
+      SSH_PRIVATE_KEY:
+      SSH_USER:
     inputs:
       ref:
         type: string
