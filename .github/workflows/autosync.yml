@@ -9,8 +9,7 @@ name: Auto Merge Upstream
 on:
   push:
   schedule:
-    - cron: '*/10 * * * *'
-  workflow_dispatch: {}
+    - cron: '*/5 * * * *'
 
 defaults:
   run:
