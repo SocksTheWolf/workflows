@@ -15,19 +15,15 @@ defaults:
   run:
     shell: bash
 
+permissions:
+  actions: write
+
 jobs:
-  clean:
-    name: Clean Actions
-    permissions:
-      contents: read
-      actions: write
-    continue-on-error: true
-    runs-on: ubuntu-latest
-    steps:
-      - name: Clean
-        uses: ./.github/workflows/clean.yml
-        with:
-          CLEAN_TOKEN: ${{ github.token }}
+  cleaner:
+    name: Actions Clean
+    uses: ./.github/workflows/clean.yml
+    secrets:
+      CLEAN_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   sync:
     name: Sync All Other Forks
