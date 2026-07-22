@@ -36,6 +36,7 @@ jobs:
       environment: sitemap
 
   update:
+    name: Build Sitemap
     runs-on: ubuntu-latest
     continue-on-error: true
     permissions:
