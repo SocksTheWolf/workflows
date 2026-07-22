@@ -2,6 +2,10 @@
 name: Build and Commit Sitemap
 on:
   workflow_call:
+    outputs:
+      had_changes:
+        description: "If the sitemap did change and was committed"
+        value: ${{ jobs.update.outputs.had_changes == 'true' }}
     secrets:
       GPG_PASSPHRASE:
       GPG_PRIVATE_KEY:
@@ -37,7 +41,7 @@ jobs:
     permissions:
       contents: write
     outputs:
-      needs_clear: ${{ steps.commit.outputs.changes_detected }}
+      had_changes: ${{ steps.commit.outputs.changes_detected }}
     environment: sitemap
     steps:
         # Grab all files + History
@@ -91,7 +95,7 @@ jobs:
   clear_sitemap_cache:
     name: Clear Sitemap Cache
     needs: update
-    if: ${{ needs.update.outputs.needs_clear == 'true' || inputs.force_clear_cache == 'true' }}
+    if: ${{ needs.update.outputs.had_changes == 'true' || inputs.force_clear_cache == 'true' }}
     uses: ./.github/workflows/cache.yml
     with:
       paths: |
