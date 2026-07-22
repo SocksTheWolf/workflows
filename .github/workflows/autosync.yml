@@ -1,7 +1,7 @@
 # Because of the nature of this repo, you will need a PAT for your other repo
 # in order to update and sync the files from the workflow.
 #
-# Needs: contents(write), workflows(write)
+# Needs: contents(write), workflows(write), actions(write)
 #
 # This token should be stored as a WORKFLOW_UPDATE secret
 
@@ -15,15 +15,14 @@ defaults:
   run:
     shell: bash
 
-permissions:
-  actions: write
+permissions: {}
 
 jobs:
   cleaner:
     name: Actions Clean
     uses: ./.github/workflows/clean.yml
     secrets:
-      CLEAN_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CLEAN_TOKEN: ${{ secrets.WORKFLOW_UPDATE }}
 
   sync:
     name: Sync All Other Forks
