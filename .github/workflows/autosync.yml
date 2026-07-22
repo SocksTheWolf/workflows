@@ -21,10 +21,20 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - run: "This is running!"
+      - run: echo "This is running!"
+
+  clean_base:
+    name: Clean Base Repo Actions
+    if: ${{ github.repository == 'socksthewolf/workflows' }}
+    permissions:
+      actions: write
+    uses: ./.github/workflows/clean.yml
+    secrets:
+      CLEAN_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   cleaner:
     name: Actions Clean
+    if: ${{ github.repository != 'socksthewolf/workflows' }}
     uses: ./.github/workflows/clean.yml
     secrets:
       CLEAN_TOKEN: ${{ secrets.WORKFLOW_UPDATE }}
