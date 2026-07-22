@@ -12,6 +12,7 @@ on:
         required: true
       clean_deploys:
         type: boolean
+        default: false
 
 permissions:
   contents: write
