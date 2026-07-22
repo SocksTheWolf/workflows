@@ -11,8 +11,7 @@ on:
   # I don't know why, but it appears that this cron is never running
   # And it's completely mysterious.
   schedule:
-    - cron: '*/10 * * * *'
-    - cron: '*/20 */2 * * *'
+    - cron: '12,21,33,42,58 * * * *'
 
 defaults:
   run:
