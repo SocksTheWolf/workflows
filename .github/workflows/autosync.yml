@@ -8,7 +8,7 @@
 name: Auto Merge Upstream
 on:
   schedule:
-    - cron: '*/30 * * * *' # every 30 minutes
+    - cron: '*/10 * * * *'
   workflow_dispatch: {}
 
 defaults:
