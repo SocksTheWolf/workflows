@@ -12,6 +12,9 @@ on:
       clean_deploys:
         type: boolean
         default: false
+      force_clear_cache:
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -85,7 +88,7 @@ jobs:
   clear_sitemap_cache:
     name: Clear Sitemap Cache
     needs: update
-    if: ${{ needs.update.outputs.needs_clear == 'true' }}
+    if: ${{ needs.update.outputs.needs_clear == 'true' || inputs.force_clear_cache == 'true' }}
     uses: ./.github/workflows/cache.yml
     with:
       paths: |
