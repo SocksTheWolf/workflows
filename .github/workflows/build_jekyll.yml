@@ -3,7 +3,11 @@
 # This requires:
 # * A filter_rules.yml in .github/
 #   * This file must have a rule in it for "clear_cache"
-# * A run.sh in .github/
+# * A run.sh in .github/ (if needs_after_run is true)
+# * An env named jekyll that defines:
+#   * secrets:PERSONAL_TOKEN
+#   * vars:CLOUDFLARE_ACCOUNT_ID
+#   * secrets:CF_SECRET
 
 name: Build And Deploy Jekyll Site
 on:
@@ -21,6 +25,9 @@ on:
       ruby_cache_version:
         type: number
         default: 1
+      needs_after_run:
+        type: boolean
+        default: false
     secrets:
       PERSONAL_TOKEN:
       CF_SECRET:
@@ -85,7 +92,7 @@ jobs:
 
         # Run arbitrary shell for running commands after build
       - name: After Build Execution
-        if: success()
+        if: success() && {{ inputs.needs_after_run != 'false' }}
         env:
           TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         run: bash .github/run.sh
