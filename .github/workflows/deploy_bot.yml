@@ -1,6 +1,10 @@
 # ScamGuard uses this to deploy it's python workers.
 # This requires an environment called "production"
 # as well as ./github/filters.yml in the repo
+#
+# This filter should define:
+# * core_updated <-- when the base python files are updated
+# * deps_update <-- if the dependencies have updated
 
 name: Deploy Bots To Cloud via SSH
 on:
