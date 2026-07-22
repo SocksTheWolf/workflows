@@ -18,9 +18,6 @@ on:
       should_clean:
         type: boolean
         default: false
-      remove_feeds:
-        type: boolean
-        default: true
       ruby_cache_version:
         type: number
         default: 1
@@ -100,7 +97,6 @@ jobs:
       - name: No Source Maps
         run: rm -rf _site/assets/**/*.map
       - name: Remove All Feeds
-        if: ${{ inputs.remove_feeds == 'true' }}
         run: rm -f _site/feed.xml
 
         # Convert jekyll redirects into CF redirects
