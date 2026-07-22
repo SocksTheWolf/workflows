@@ -1,6 +1,5 @@
 name: Auto Merge Upstream
 on:
-  workflow_call:
   schedule:
     - cron: '*/30 * * * *' # every 30 minutes
   workflow_dispatch: {}
@@ -19,8 +18,7 @@ jobs:
       - name: Run GH Sync
         id: sync
         if: ${{ github.repository != 'socksthewolf/workflows' }}
-        run: "gh api --method POST -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2026-03-10' /repos/$REPO/merge-upstream -f 'branch=$BRANCH'"
+        run: "gh api --method POST -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2026-03-10' /repos/$REPO/merge-upstream -f 'branch=main'"
         env:
           REPO: ${{ github.repository }}
-          BRANCH: ${{ github.ref_name }}
           GH_TOKEN: ${{ github.token }}
