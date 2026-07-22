@@ -41,7 +41,7 @@ jobs:
     environment: sitemap
     steps:
       - name: Checkout
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
         with:
           ref: "main"
           fetch-depth: 0

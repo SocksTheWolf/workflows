@@ -63,7 +63,7 @@ jobs:
         if: ${{ env.token_check == '' }}
         run: echo "Missing Cloudflare Token! Exiting..." && exit 1
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
       - name: Setup Node
         if: ${{ inputs.needs_node }}
         uses: actions/setup-node@v6
