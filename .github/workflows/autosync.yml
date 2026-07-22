@@ -7,21 +7,37 @@ on:
 permissions:
   actions: write
   contents: write
+
 defaults:
   run:
     shell: bash
 
 jobs:
+  clean:
+    name: Clean Actions
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clean
+        uses: ./.github/workflows/clean.yml
+        with:
+          CLEAN_TOKEN: ${{ github.token }}
+
   sync:
     name: Sync All Other Forks
     if: ${{ github.repository != 'socksthewolf/workflows' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Clean Actions
-        continue-on-error: true
-        uses: ./.github/workflows/clean.yml
+      - name: Get Actions
+        uses: thiagokokada/merge-upstream@v1.0.2
         with:
-          CLEAN_TOKEN: ${{ github.token }}
+          branch: main
+
+# this needs a github PAT in order to work via the GH API.
+  bad:
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Run GH Sync
         run: "gh api --method POST -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2026-03-10' /repos/$REPO/merge-upstream -f 'branch=main'"
         env:
