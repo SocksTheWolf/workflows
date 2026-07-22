@@ -2,6 +2,9 @@
 name: Build and Commit Sitemap
 on:
   workflow_call:
+    secrets:
+      GPG_PASSPHRASE:
+      GPG_PRIVATE_KEY:
     inputs:
       path:
         type: string
