@@ -2,6 +2,7 @@
 #
 # This requires:
 # * A filter_rules.yml in .github/
+#   * This file must have a rule in it for "clear_cache"
 # * A run.sh in .github/
 
 name: Build And Deploy Jekyll Site
