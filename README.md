@@ -26,6 +26,7 @@ Secrets are funny, there are some undocumented quirks about them:
     - There are bypasses to this, but they slightly compromise the integrity of the secrets store
 - **However**, secrets stored in environments will _automatically be passed_ if the action is called with `secrets: inherit`
     - This behavior does chain properly to chained invokations
+    - _Only the initial caller_ has to specify the inherit option
 - If you want to use inherit on an org level, you must fork this repo
     - This _may_ only be a restriction for orgs, had mixed success while testing user references
 
