@@ -121,5 +121,5 @@ jobs:
     if: success() && (needs.build.outputs.clear_cache == 'true' || inputs.force_clear == 'true')
     name: Cloudflare Cache Cleaner
     uses: ./.github/workflows/cache.yml
-    with:
+    secrets:
       CLOUDFLARE_TOKEN: ${{ secrets.CF_SECRET }}
