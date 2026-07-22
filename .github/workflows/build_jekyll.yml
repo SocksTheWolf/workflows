@@ -17,6 +17,12 @@ on:
       should_clean:
         type: boolean
         default: false
+      remove_feeds:
+        type: boolean
+        default: true
+      ruby_cache_version:
+        type: number
+        default: 1
     secrets:
       PERSONAL_TOKEN:
       CF_SECRET:
@@ -42,15 +48,20 @@ jobs:
     runs-on: ubuntu-latest
     name: Jekyll Build
     environment: jekyll
+    outputs:
+      clear_cache: ${{ steps.filter.outputs.clear_cache == 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        # Check for if we should Clear the Cache at the end of all steps
       - name: Cache Clear Check
         uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706
         id: filter
         with:
           base: ${{ inputs.ref }}
           filters: ".github/filter_rules.yml"
+
+        # Needed for PurgeCSS/Wrangler
       - name: Setup node
         uses: actions/setup-node@v6
         with:
@@ -59,11 +70,14 @@ jobs:
           package-manager-cache: true
       - name: Node Package Install
         run: npm install
+
+
+        # Also set up Ruby for Jekyll
       - name: Setup Ruby
         uses: ruby/setup-ruby@4eb9f110bac952a8b68ecf92e3b5c7a987594ba6
         with:
           bundler-cache: true
-          cache-version: 1
+          cache-version: ${{ inputs.ruby_cache_version }}
       - name: Build with Jekyll
         # Outputs to the './_site' directory by default
         run: bundle exec jekyll build --baseurl ""
@@ -80,13 +94,19 @@ jobs:
         # this should fix all of it though
         if: success()
         run: npm run purge-ci
-      - name: No Maps
+
+        # Remove excess files
+      - name: No Source Maps
         run: rm -rf _site/assets/**/*.map
-      - name: No Feeds
+      - name: Remove All Feeds
+        if: ${{ inputs.remove_feeds == 'true' }}
         run: rm -f _site/feed.xml
+
         # Convert jekyll redirects into CF redirects
       - name: Redirect Update
         uses: socksthewolf/jekyll-cloudflare-redirects@0ca292af046fe1f9b482bed5adb3964c78cf31c3
+
+        # Take everything in our runtime and punt it to Cloudflare
         # Upload directory to CF
       - name: Upload to Cloudflare
         if: success()
@@ -94,11 +114,12 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_SECRET }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
         run: npm run deploy
-        # Delete the cloudflare cache after deploy
-      - name: Cloudflare Cache Cleaner
-        if: success() && (steps.filter.outputs.clear_cache == 'true' || inputs.force_clear == 'true')
-        uses: Cyb3r-Jak3/action-cloudflare-cache@6ebf798ade84e7ab7da249404e0c3b9aecf54f88
-        with:
-          zone: ${{ vars.CLOUDFLARE_ZONE }}
-          api_token: ${{ secrets.CF_SECRET }}
-          account_id: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+
+  # Delete the cloudflare cache after deploy
+  clear:
+    needs: build
+    if: success() && (needs.build.outputs.clear_cache == 'true' || inputs.force_clear == 'true')
+    name: Cloudflare Cache Cleaner
+    uses: ./.github/workflows/cache.yml
+    with:
+      CLOUDFLARE_TOKEN: ${{ secrets.CF_SECRET }}

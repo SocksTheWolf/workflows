@@ -16,12 +16,16 @@ on:
         required: true
       needs_node:
         type: boolean
+        default: false
       is_download:
         type: boolean
+        default: false
       download_uri:
         type: string
+        default: ""
       clean_deploys:
         type: boolean
+        default: false
     secrets:
       CLOUDFLARE_TOKEN:
 
@@ -59,7 +63,7 @@ jobs:
         if: ${{ env.token_check == '' }}
         run: echo "Missing Cloudflare Token! Exiting..." && exit 1
       - name: Checkout
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7
       - name: Setup Node
         if: ${{ inputs.needs_node }}
         uses: actions/setup-node@v6

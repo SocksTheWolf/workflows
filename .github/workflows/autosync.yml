@@ -30,6 +30,11 @@ jobs:
     if: ${{ github.repository != 'socksthewolf/workflows' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Check if Secret Defined
+        env:
+          has_token: ${{ secrets.WORKFLOW_UPDATE }}
+        if: ${{ env.has_token == '' }}
+        run: echo "This needs a PAT to continue, please set one with the correct permissions!" && exit 1
       - name: Run GH Sync
         run: "gh api --method POST -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2026-03-10' /repos/$REPO/merge-upstream -f 'branch=main'"
         env:

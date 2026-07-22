@@ -7,6 +7,8 @@ name: Clear Cloudflare Cache
 
 on:
   workflow_call:
+    secrets:
+      CLOUDFLARE_TOKEN:
 
 jobs:
   clear_cache:
