@@ -14,6 +14,7 @@ on:
         required: true
       force_restart:
         type: boolean
+        default: false
 
 permissions:
   deployments: write
