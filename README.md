@@ -10,21 +10,31 @@ So now it's one place to manage my workflows that can be used across orgs/repos.
 
 ## Notes
 
-### On Organization Secrets
+### On Secrets
 
-**NOTE**: If you want to use the secrets without passing them explicitly in an org, you _must_ fork the repo.
+**tl:dr;** If you want to use the secrets without passing them explicitly in an org, you _must_ fork the repo.
 
-Otherwise, secrets will not transfer automatically even when the enviroment exists already in the repo.
+Otherwise, secrets will not transfer automatically even when the environment exists already in the repo.
 If you do not want to fork, you must manually pass the secrets.
 
-Be warned, you can only manually pass repository secrets. You cannot manually pass a secret stored in an environment.
-(but you can secrets stored in environments if you call an action with `secrets: inherit`)
+#### Limitations
+
+Secrets are funny, there are some undocumented quirks about them:
+
+- You can only manually pass secrets that are stored on the repo/org level
+- You **cannot** load an environment manually and pass secret defined there
+    - There are bypasses to this, but they slightly compromise the integrity of the secrets store
+- **However**, secrets stored in environments will _automatically be passed_ if the action is called with `secrets: inherit`
+    - This behavior does chain properly to chained invokations
+- If you want to use inherit on an org level, you must fork this repo
+    - This _may_ only be a restriction for orgs, had mixed success while testing user references
 
 ---
 ### On Forking
 
-You must manually enable actions in the fork before any other actions run.
+You must:
 
-You must also manually enable autosync's workflow. 
+- manually enable actions in the fork before any other actions run
+- manually enable autosync's workflow
 
 Once done, it may take a day before scheduled actions run.
