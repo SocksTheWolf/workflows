@@ -28,7 +28,7 @@ jobs:
       - name: Clearing Individual Paths
         if: ${{ inputs.paths != '' }}
         run: echo true
-      - name: Clear Cache
+      - name: Write CF Cache Changes
         uses: Cyb3r-Jak3/action-cloudflare-cache@6ebf798ade84e7ab7da249404e0c3b9aecf54f88
         with:
           zone: ${{ vars.CLOUDFLARE_ZONE }}

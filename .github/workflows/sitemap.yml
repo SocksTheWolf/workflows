@@ -18,18 +18,13 @@ permissions:
   deployments: write
 
 jobs:
-  clean_sitemap_deploys:
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    name: Clean Github Sitemap Deploys
+  clean_deploys:
+    name: Cleanup Previous Deployments
     if: ${{ inputs.clean_deploys }}
-    steps:
-      - name: Cleanup Previous Deploys
-        uses: strumwolf/delete-deployment-environment@035f6d27c8b8951729f4d71b2d3d6a7975139476
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          environment: sitemap
-          onlyRemoveDeployments: true
+    uses: ./.github/workflows/clean_deploys.yml
+    with:
+      environment: sitemap
+
   update:
     runs-on: ubuntu-latest
     continue-on-error: true

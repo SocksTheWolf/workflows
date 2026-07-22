@@ -27,14 +27,10 @@ permissions:
 jobs:
   cleanup:
     name: Cleanup Previous Deployments
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: strumwolf/delete-deployment-environment@035f6d27c8b8951729f4d71b2d3d6a7975139476
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          environment: production
-          onlyRemoveDeployments: true
+    uses: ./.github/workflows/clean_deploys.yml
+    with:
+      environment: production
+
   deploy:
     name: Deploy Bot
     environment: production

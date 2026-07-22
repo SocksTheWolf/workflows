@@ -10,7 +10,8 @@ jobs:
     name: Cleanup Actions
     runs-on: ubuntu-latest
     steps:
-      - uses: igorjs/gh-actions-clean-workflow@5fa2e3a4fdd40e3e7098645a0b8df08624352e5e
+      - name: Run Clean
+        uses: igorjs/gh-actions-clean-workflow@5fa2e3a4fdd40e3e7098645a0b8df08624352e5e
         id: clean
         with:
           token: ${{ secrets.CLEAN_TOKEN }}

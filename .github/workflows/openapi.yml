@@ -40,16 +40,11 @@ permissions:
 
 jobs:
   clean_deploys:
-    runs-on: ubuntu-latest
-    continue-on-error: true
+    name: Cleanup Previous Deployments
     if: ${{ inputs.clean_deploys }}
-    name: Clean Old OpenAPI Deploys
-    steps:
-      - uses: strumwolf/delete-deployment-environment@035f6d27c8b8951729f4d71b2d3d6a7975139476
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          environment: openapi
-          onlyRemoveDeployments: true
+    uses: ./.github/workflows/clean_deploys.yml
+    with:
+      environment: openapi
 
   build_spec:
     name: Generate & Upload Spec
