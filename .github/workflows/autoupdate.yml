@@ -86,6 +86,7 @@ jobs:
         if: success()
         run: |
           if [ -z "$NODE_DIR" ]; then
+            echo "moved directory"
             cd $NODE_DIR
           fi
           npm install wrangler@latest --save-dev
@@ -115,8 +116,10 @@ jobs:
         if: ${{ success() && steps.type_check.outputs.has_data == 'true' }}
         run: |
           if [ -z "$NODE_DIR" ]; then
+            echo "moved directory"
             cd $NODE_DIR
           fi
+          npm install
           npm run types
         env:
           NODE_DIR: ${{ steps.node_directory.outputs.dir }}
