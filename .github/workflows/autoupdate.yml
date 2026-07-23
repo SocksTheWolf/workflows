@@ -1,4 +1,4 @@
-name: Auto Push Wrangler Updates
+name: Auto Wrangler Updates
 on:
   workflow_dispatch:
 
@@ -35,7 +35,7 @@ jobs:
           operator: "OR"
 
   sync-repos:
-    name: Dispatch Event (${{ matrix.repo.name }})
+    name: Update Wrangler (${{ matrix.repo.name }})
     if: ${{ needs.get-repos.outputs.repos != '[]' }} # make sure repos exist
     runs-on: ubuntu-latest
     environment: wrangler-update
@@ -82,7 +82,7 @@ jobs:
           node-version-file: ${{ steps.node_directory.outputs.ver }}
           package-manager-cache: true
 
-      - name: Update
+      - name: Install Wrangler Latest
         if: success()
         run: |
           if [ -n "$NODE_DIR" ]; then
@@ -143,7 +143,7 @@ jobs:
           delete-branch: true
           commit-message: "Update Wrangler"
           title: "Chore: Wrangler Update"
-          assignees: ${{ github.repository_owner }}
+          assignees: ${{ github.actor }}
           committer: "${{ steps.import-gpg.outputs.name }} <${{ steps.import-gpg.outputs.email }}>"
           body: "As promised, the update to your wrangler dependencies"
           branch: "chore/wrangler-update"
