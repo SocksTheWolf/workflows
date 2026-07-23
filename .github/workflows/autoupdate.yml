@@ -85,7 +85,7 @@ jobs:
       - name: Update
         if: success()
         run: |
-          if [ -z "$NODE_DIR" ]; then
+          if [ -n "$NODE_DIR" ]; then
             echo "moved directory"
             cd $NODE_DIR
           fi
@@ -115,7 +115,7 @@ jobs:
       - name: Build types
         if: ${{ success() && steps.type_check.outputs.has_data == 'true' }}
         run: |
-          if [ -z "$NODE_DIR" ]; then
+          if [ -n "$NODE_DIR" ]; then
             echo "moved directory"
             cd $NODE_DIR
           fi
