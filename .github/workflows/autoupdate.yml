@@ -56,12 +56,14 @@ jobs:
         id: node_directory
         run: |
           dir=$(dirname $(realpath $(find . -name 'wrangler.toml')))
-          echo "dir=${dir/$WORKSPACE/#/}" >> "$GITHUB_OUTPUT"
-          echo ${dir/$WORKSPACE/#/}
-          echo "ver=${dir/$WORKSPACE/#/}/.node-version" >> "$GITHUB_OUTPUT"
-          echo "lock=${dir/$WORKSPACE/#/}/package-lock.json" >> "$GITHUB_OUTPUT"
-          echo "pack=${dir/$WORKSPACE/#/}/package.json" >> "$GITHUB_OUTPUT"
-          echo ${dir/$WORKSPACE/#/}/package-lock.json
+          dir=${dir/$WORKSPACE}
+          dir=${dir#/}
+          echo "dir=${dir}" >> "$GITHUB_OUTPUT"
+          echo ${dir}
+          echo "ver=${dir}/.node-version" >> "$GITHUB_OUTPUT"
+          echo "lock=${dir}/package-lock.json" >> "$GITHUB_OUTPUT"
+          echo "pack=${dir}/package.json" >> "$GITHUB_OUTPUT"
+          echo ${dir}/package-lock.json
         env:
           WORKSPACE: ${{ github.workspace }}
 
