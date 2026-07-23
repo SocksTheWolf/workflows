@@ -15,6 +15,10 @@ on:
         description: "If there are specific URLS to be cleared, this should be a multi-line input. If zone should be cleared, leave blank"
         default: ""
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   clear_cache:
     name: Clear Cloudflare Cache

@@ -40,14 +40,14 @@ on:
       CLOUDFLARE_TOKEN:
         description: "This must be able to clear cache and deploy sites/bindings"
 
-defaults:
-  run:
-    shell: bash
-
 permissions:
   contents: read
   actions: write
   deployments: write
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   clean_actions:

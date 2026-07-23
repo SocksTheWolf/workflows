@@ -13,12 +13,12 @@ on:
   schedule:
     - cron: '12,21,33,42,58 * * * *'
 
+permissions:
+  actions: write
+
 defaults:
   run:
     shell: bash
-
-permissions:
-  actions: write
 
 jobs:
   clean_base:

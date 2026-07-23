@@ -35,14 +35,14 @@ on:
       CLOUDFLARE_TOKEN:
         description: "A Cloudflare API Token with Domain API Gateway Edit Support"
 
-defaults:
-  run:
-    shell: bash
-
 permissions:
   contents: read
   actions: write
   deployments: write
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   clean_deploys:

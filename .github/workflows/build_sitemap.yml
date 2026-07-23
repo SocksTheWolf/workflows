@@ -31,6 +31,10 @@ permissions:
   contents: write
   deployments: write
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   clean_deploys:
     name: Cleanup Previous Deployments

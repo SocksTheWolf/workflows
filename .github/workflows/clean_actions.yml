@@ -5,6 +5,10 @@ on:
 permissions:
   actions: write
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   # Clean up github job
   cleanup_actions:
