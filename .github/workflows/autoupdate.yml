@@ -56,12 +56,12 @@ jobs:
         id: node_directory
         run: |
           dir=$(dirname $(realpath $(find . -name 'wrangler.toml')))
-          echo "dir=${dir/$WORKSPACE/}" >> "$GITHUB_OUTPUT"
-          echo ${dir/$WORKSPACE/}
-          echo "ver=${dir/$WORKSPACE/}/.node-version" >> "$GITHUB_OUTPUT"
-          echo "lock=${dir/$WORKSPACE/}/package-lock.json" >> "$GITHUB_OUTPUT"
-          echo "pack=${dir/$WORKSPACE/}/package.json" >> "$GITHUB_OUTPUT"
-          echo ${dir/$WORKSPACE/}/package-lock.json
+          echo "dir=${dir/$WORKSPACE/#/}" >> "$GITHUB_OUTPUT"
+          echo ${dir/$WORKSPACE/#/}
+          echo "ver=${dir/$WORKSPACE/#/}/.node-version" >> "$GITHUB_OUTPUT"
+          echo "lock=${dir/$WORKSPACE/#/}/package-lock.json" >> "$GITHUB_OUTPUT"
+          echo "pack=${dir/$WORKSPACE/#/}/package.json" >> "$GITHUB_OUTPUT"
+          echo ${dir/$WORKSPACE/#/}/package-lock.json
         env:
           WORKSPACE: ${{ github.workspace }}
 
@@ -70,7 +70,7 @@ jobs:
         uses: actions/setup-node@v7
         with:
           cache: "npm"
-          cache-dependency-path: "*package-lock.json"
+          cache-dependency-path: ${{ steps.node_directory.outputs.lock }}
           node-version-file: ${{ steps.node_directory.outputs.ver }}
           package-manager-cache: true
 
