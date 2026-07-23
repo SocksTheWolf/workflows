@@ -51,7 +51,7 @@ jobs:
         run: dir=$(dirname */wrangler.toml) >> "$GITHUB_OUTPUT"
 
       - name: Update directory
-        if: ${{ steps.npm_directory.outputs.dir != '*' }}
+        if: ${{ steps.npm_directory.outputs.dir != '*' && steps.npm_directory.outputs.dir != '' }}
         run: cd $WRANGLER_DIR
         env:
           WRANGLER_DIR: ${{ steps.npm_directory.outputs.dir }}
@@ -79,9 +79,14 @@ jobs:
         run: "npm run types"
 
       - name: Change Back Path
-        if: ${{ steps.npm_directory.outputs.dir != '*' }}
-        run: cd ..
+        if: ${{ steps.npm_directory.outputs.dir != '*' && steps.npm_directory.outputs.dir != '' }}
+        run: |
+          echo $WORKSPACE
+          cd $WORKSPACE
+        env:
+          WORKSPACE: ${{ github.workspace }}
 
+        # May consider auto committing the update tbh
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
         id: commit
