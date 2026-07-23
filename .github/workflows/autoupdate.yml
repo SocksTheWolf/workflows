@@ -52,15 +52,9 @@ jobs:
           token: ${{ secrets.READ_REPO_TOKEN }}
           repository: ${{ matrix.repo.full_name }}
 
-      - name: Find wrangler.toml
+      - name: Find Cloudflare Directory
         id: npm_directory
-        run: dir=$(dirname */wrangler.toml) >> "$GITHUB_OUTPUT"
-
-      - name: Update directory
-        if: ${{ steps.npm_directory.outputs.dir != '*' && steps.npm_directory.outputs.dir != '' }}
-        run: cd $WRANGLER_DIR
-        env:
-          WRANGLER_DIR: ${{ steps.npm_directory.outputs.dir }}
+        run: cd $(dirname $(realpath $(find . -name 'wrangler.toml')))
 
       - name: Install Node
         id: node
@@ -97,8 +91,7 @@ jobs:
         if: ${{ success() && steps.type_check.outputs.has_data == 'true' }}
         run: "npm run types"
 
-      - name: Change Back Path
-        if: ${{ steps.npm_directory.outputs.dir != '*' && steps.npm_directory.outputs.dir != '' }}
+      - name: Go back to root
         run: |
           echo $WORKSPACE
           cd $WORKSPACE
