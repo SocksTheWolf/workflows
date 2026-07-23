@@ -4,10 +4,18 @@
 # Needs: contents(write), workflows(write), actions(write)
 #
 # This token should be stored as a WORKFLOW_UPDATE secret
-
-name: Auto Merge Upstream
+name: Auto Merge From Upstream
 on:
-  workflow_dispatch:
+  workflow_dispatch: {}
+  workflow_call:
+    secrets:
+      WORKFLOW_UPDATE:
+        description: "This must be a Personal Access Token with the needs defined in this file"
+        required: true
+    outputs:
+      sync_result:
+        value: ${{ jobs.sync.outputs.sync_result }}
+
   # I don't know why, but it appears that this cron is never running
   # And it's completely mysterious.
   schedule:
@@ -29,8 +37,10 @@ jobs:
     uses: ./.github/workflows/clean_actions.yml
 
   sync:
-    name: Sync All Other Forks
+    name: Sync Fork
     if: ${{ github.repository != 'socksthewolf/workflows' }}
+    outputs:
+      sync_result: ${{ steps.gh-sync.outputs.response }}
     runs-on: ubuntu-latest
     steps:
       - name: Fail if secrets are not defined
@@ -39,10 +49,13 @@ jobs:
         if: ${{ env.has_token == '' }}
         run: echo "This needs a PAT to continue, please set one with the correct permissions!" && exit 1
       - name: Run GH Sync
+        id: gh-sync
         # main is hardcoded here because cron scripts cannot run on any
         # branch besides the default one (which is main across all projects)
-        run: "gh api --method POST -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2026-03-10' /repos/$REPO/merge-upstream -f 'branch=main'"
+        run: |
+          response=(gh api --method POST -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: $API_VERSION' /repos/$REPO/merge-upstream -f 'branch=main' | jq .message) >> $GITHUB_OUTPUT
+          echo $response
         env:
           REPO: ${{ github.repository }}
+          API_VERSION: "2026-03-10"
           GH_TOKEN: ${{ secrets.WORKFLOW_UPDATE }}
-
