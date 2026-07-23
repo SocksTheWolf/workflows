@@ -73,12 +73,10 @@ jobs:
         run: |
           cat >file_list.txt <<EOL
             |
-              $WORKSPACEpackage.json
-              $WORKSPACEpackage-lock.json
+              *.json
               $TYPES
           EOL
         env:
-          WORKSPACE: ${{ inputs.npm_directory }}
           TYPES: ${{ inputs.types_file }}
 
       - name: Check Files Output
@@ -89,11 +87,17 @@ jobs:
         if: success()
         run: resp=$(cat file_list.txt) >> "$GITHUB_OUTPUT"
 
+      - name: Check Var Output
+        run: echo $FILE_PATHS
+        env:
+          FILE_PATHS: ${{ steps.paths.outputs.resp }}
+
       - name: Delete file
         run: "rm -f file_list.txt"
 
       - name: Commit Updates
         id: commit
+        if: ${{ steps.paths.outcome == 'success' }}
         uses: ryancyq/github-signed-commit@cb9b21ee83578fe8e26a9eda530015aedf0c7c5b
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
