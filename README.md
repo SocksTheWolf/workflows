@@ -55,5 +55,6 @@ Once done, it may take a day before scheduled actions run.
 | `clean_actions.yml` | `clean_actions` | true | N/A |
 | `clean_deploys.yml` | `clean_deploys` | false | max |
 | `clear_cache.yml` | `cloudflare_cache` | true | N/A |
+| `autosync.yml` | `autosync` | true | N/A |
 
 Max Queueing is 100 jobs.

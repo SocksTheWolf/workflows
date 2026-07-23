@@ -20,6 +20,10 @@ defaults:
   run:
     shell: bash
 
+concurrency:
+  group: "autosync"
+  cancel-in-progress: true
+
 jobs:
   clean_actions:
     uses: ./.github/workflows/clean_actions.yml
