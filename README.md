@@ -42,3 +42,18 @@ You must:
 - manually enable autosync's workflow
 
 Once done, it may take a day before scheduled actions run.
+
+---
+
+### On Concurrency
+
+| File | Group | Cancelable | Queue Max |
+| --- | --- | --- | --- |
+| `build_jekyll.yml` | `jekyll_build` | false | single |
+| `build_openapi.yml` | `openapi` | false | max |
+| `build_sitemap.yml` | `sitemap` | false | max |
+| `clean_actions.yml` | `clean_actions` | true | N/A |
+| `clean_deploys.yml` | `clean_deploys` | false | max |
+| `clear_cache.yml` | `cloudflare_cache` | true | N/A |
+
+Max Queueing is 100 jobs.

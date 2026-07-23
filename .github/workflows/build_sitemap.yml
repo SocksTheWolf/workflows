@@ -35,6 +35,11 @@ defaults:
   run:
     shell: bash
 
+concurrency:
+  group: "sitemap"
+  cancel-in-progress: false
+  queue: max
+
 jobs:
   clean_deploys:
     if: ${{ inputs.clean_deploys == 'true' }}

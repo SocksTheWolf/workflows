@@ -51,6 +51,11 @@ defaults:
   run:
     shell: bash
 
+concurrency:
+  group: openapi
+  cancel-in-progress: false
+  queue: max
+
 jobs:
   clean_deploys:
     if: ${{ inputs.clean_deploys == 'true' }}

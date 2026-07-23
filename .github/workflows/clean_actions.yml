@@ -9,6 +9,10 @@ defaults:
   run:
     shell: bash
 
+concurrency:
+  group: "clean_actions"
+  cancel-in-progress: true
+
 jobs:
   cleanup_actions:
     name: Clean
