@@ -1,0 +1,94 @@
+name: Push Wrangler Updates
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: wrangler
+  cancel-in-progress: false
+  queue: single
+
+jobs:
+  get-repos:
+    name: Get All Repos
+    runs-on: ubuntu-latest
+    outputs:
+      repos: ${{ steps.get-repos.outputs.repos }}
+    steps:
+      - name: Query Repositories
+        id: get-repos
+        uses: raven-actions/get-repos@258118113f2749182a50a86e995f1371fbdc7498
+        with:
+          owner: ${{ github.repository_owner }}
+          topics: "wrangler,test"
+          operator: "AND"
+
+  sync-repos:
+    name: Dispatch Event (${{ matrix.repo.name }})
+    if: ${{ needs.get-repos.outputs.repos != '[]' }} # make sure repos exist
+    runs-on: ubuntu-latest
+    environment: wrangler-update
+    needs:
+      - get-repos
+    strategy:
+      matrix:
+        repo: ${{ fromJson(needs.get-repos.outputs.repos) }}
+      fail-fast: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.READ_REPO_TOKEN }}
+          repository: ${{ matrix.repo.full_name }}
+
+      - name: Find wrangler.toml
+        id: npm_directory
+        run: dir=$(dirname */wrangler.toml) >> "$GITHUB_OUTPUT"
+
+      - name: Update directory
+        if: ${{ steps.npm_directory.outputs.dir != '*' }}
+        run: cd $WRANGLER_DIR
+        env:
+          WRANGLER_DIR: ${{ steps.npm_directory.outputs.dir }}
+
+      - name: Install Node
+        id: node
+        uses: actions/setup-node@v7
+        with:
+          cache: "npm"
+          node-version-file: ".node-version"
+          package-manager-cache: true
+
+      - name: Update
+        if: success()
+        run: "npm install wrangler@latest --save-dev"
+
+      - name: Read packages.json
+        id: package_read
+        uses: socksthewolf/github-action-json@v1.0.3
+        with:
+          path: "package.json"
+
+      - name: Update types
+        if: ${{ success() && contains(fromJson(steps.package_read.outputs.scripts), "types") }}
+        run: "npm run types"
+
+      - name: Change Back Path
+        if: ${{ steps.npm_directory.outputs.dir != '*' }}
+        run: cd ..
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
+        id: commit
+        with:
+          token: ${{ secrets.CREATE_PR_TOKEN }}
+          sign-commits: true
+          delete-branch: true
+          commit-message: "Update Wrangler"
+          title: "Chore: Wrangler Update"
+          assignees: ${{ github.repository_owner }}
+          body: "As promised, the update to your wrangler dependencies"
+          branch: "chore/wrangler-update"
