@@ -7,7 +7,7 @@
 #
 # You can also bypass the environment by passing CLOUDFLARE_TOKEN explicitly
 
-name: Build OpenAPI Spec
+name: Build OpenAPI spec
 on:
   workflow_call:
     inputs:
@@ -34,6 +34,13 @@ on:
     secrets:
       CLOUDFLARE_TOKEN:
         description: "A Cloudflare API Token with Domain API Gateway Edit Support"
+    outputs:
+      has_spec:
+        value: ${{ jobs.build_spec.outputs.has_spec == 'true' }}
+        description: "If the OpenAPI spec was successfully found"
+      uploaded:
+        value: ${{ jobs.build_spec.outputs.uploaded_spec == 'true' }}
+        description: "If the OpenAPI spec was successfully uploaded to API Shield"
 
 permissions:
   contents: read
@@ -46,8 +53,7 @@ defaults:
 
 jobs:
   clean_deploys:
-    name: Cleanup Previous Deployments
-    if: ${{ inputs.clean_deploys }}
+    if: ${{ inputs.clean_deploys == 'true' }}
     uses: ./.github/workflows/clean_deploys.yml
     with:
       environment: openapi
@@ -55,6 +61,9 @@ jobs:
   build_spec:
     name: Generate & Upload Spec
     runs-on: ubuntu-latest
+    outputs:
+      has_spec: ${{ steps.spec_check.outputs.has_file == 'true' }}
+      uploaded_spec: ${{ steps.upload.conclusion == 'success' }}
     environment: openapi
     steps:
         # Check if we can run
@@ -72,7 +81,8 @@ jobs:
 
         # Build sitemap with node
       - name: Setup Node
-        if: ${{ inputs.needs_node }}
+        id: node
+        if: ${{ inputs.needs_node == 'true' }}
         uses: actions/setup-node@v7
         with:
           cache: "npm"
@@ -80,15 +90,15 @@ jobs:
           package-manager-cache: true
 
       - name: Install and Build Spec
-        if: ${{ inputs.needs_node }}
+        if: ${{ inputs.needs_node == 'true' && steps.node.conclusion == 'success' }}
         run: npm install && npm run openapi
 
         # Download Existing OpenAPI spec if provided
       - name: If Download but Missing Download URI
-        if: ${{ inputs.is_download && inputs.download_uri == '' }}
+        if: ${{ inputs.is_download == 'true' && inputs.download_uri == '' }}
         run: exit 1
       - name: Download OpenAPI Spec
-        if: ${{ inputs.is_download && inputs.download_uri != '' }}
+        if: ${{ inputs.is_download == 'true' && inputs.download_uri != '' }}
         run: curl --no-progress-meter --output openapi.json "$DOWNLOAD_URL"
         env:
           DOWNLOAD_URL: ${{ inputs.download_uri }}
@@ -108,6 +118,7 @@ jobs:
         # If we have the file, upload it to CF API Shield
       - name: Upload Spec to API Shield
         if: ${{ steps.spec_check.outputs.has_file == 'true' }}
+        id: upload
         uses: socksthewolf/cloudflare-upload-spec@4aa5efd32ce6fc898dcb794ccd7e3001568cce10
         with:
           zone_id: ${{ vars.CLOUDFLARE_ZONE }}

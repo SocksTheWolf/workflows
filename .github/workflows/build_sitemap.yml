@@ -1,5 +1,5 @@
 # Builds a sitemap using sscli, then commits it to the repository
-name: Build and Commit Sitemap
+name: Build & Commit Sitemap
 on:
   workflow_call:
     outputs:
@@ -37,8 +37,7 @@ defaults:
 
 jobs:
   clean_deploys:
-    name: Cleanup Previous Deployments
-    if: ${{ inputs.clean_deploys }}
+    if: ${{ inputs.clean_deploys == 'true' }}
     uses: ./.github/workflows/clean_deploys.yml
     with:
       environment: sitemap
@@ -46,11 +45,10 @@ jobs:
   update:
     name: Build Sitemap
     runs-on: ubuntu-latest
-    continue-on-error: true
     permissions:
       contents: write
     outputs:
-      had_changes: ${{ steps.commit.outputs.changes_detected }}
+      had_changes: ${{ steps.commit.outputs.changes_detected == 'true' }}
     environment: sitemap
     steps:
         # Grab all files + History
@@ -59,8 +57,10 @@ jobs:
         with:
           ref: "main"
           fetch-depth: 0
+
         # Fix modification timestamps
       - name: Fix Timestamps
+        if: success()
         uses: chetan/git-restore-mtime-action@d186aca54f8760da4dec55313195e51ed3ebb0b3
         with:
           args: --no-directories --skip-missing
@@ -72,7 +72,7 @@ jobs:
           cache: "npm"
           node-version-file: ".node-version"
           package-manager-cache: true
-        # Build Node
+        # Install packages
       - name: Install and Build Sitemap
         if: success()
         run: npm install && npm run sitemap
@@ -99,6 +99,7 @@ jobs:
           commit_author: "${{ steps.import-gpg.outputs.name }} <${{ steps.import-gpg.outputs.email }}>"
           commit_user_name: ${{ steps.import-gpg.outputs.name }}
           commit_user_email: ${{ steps.import-gpg.outputs.email }}
+          # All Commits are Signed
           commit_options: '-S'
 
   clear_sitemap_cache:

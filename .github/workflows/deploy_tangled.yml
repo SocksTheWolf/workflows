@@ -1,3 +1,6 @@
+# This workflow requires an environment named "tangled"
+# that has a variable named "MIRROR_REPO" that has
+# the repository path of your project
 name: Tangled Mirror
 
 on:
@@ -10,15 +13,19 @@ permissions:
   contents: read
   deployments: write
 
+concurrency:
+  group: tangled
+  cancel-in-progress: false
+
 jobs:
   clean_deployments:
-    name: Clean Tangled Deploys
     uses: ./.github/workflows/clean_deploys.yml
     with:
       environment: tangled
 
   push_tangled:
-    name: Update Tangled Mirror
+    name: Update
+    # Wait for the clean deploys to finish
     needs: clean_deployments
     runs-on: ubuntu-latest
     environment: tangled

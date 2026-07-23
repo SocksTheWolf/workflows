@@ -21,8 +21,7 @@ defaults:
     shell: bash
 
 jobs:
-  clean_base:
-    name: Actions Clean
+  clean_actions:
     uses: ./.github/workflows/clean_actions.yml
 
   sync:

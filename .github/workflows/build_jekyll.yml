@@ -10,7 +10,7 @@
 #   * vars:CLOUDFLARE_ACCOUNT_ID
 #   * secrets:CLOUDFLARE_TOKEN
 
-name: Build And Deploy Jekyll Site
+name: Build & Deploy Jekyll
 on:
   workflow_call:
     inputs:
@@ -39,6 +39,13 @@ on:
         description: "Passed to the shell via a $TOKEN flag if needs_after_run is true"
       CLOUDFLARE_TOKEN:
         description: "This must be able to clear cache and deploy sites/bindings"
+    outputs:
+      built:
+        value: ${{ jobs.build.outputs.built == 'true' }}
+        description: "If the Jekyll site was successfully built"
+      deployed:
+        value: ${{ jobs.build.outputs.deployed == 'true' }}
+        description: "If the site was able to be deployed to Cloudflare"
 
 permissions:
   contents: read
@@ -51,13 +58,11 @@ defaults:
 
 jobs:
   clean_actions:
-    name: Actions Clean
-    if: ${{ inputs.should_clean }}
+    if: ${{ inputs.should_clean == 'true' }}
     uses: ./.github/workflows/clean_actions.yml
 
   clean_deploys:
-    name: Deployments Clean
-    if: ${{ inputs.should_clean }}
+    if: ${{ inputs.should_clean == 'true' }}
     uses: ./.github/workflows/clean_deploys.yml
     with:
       environment: jekyll
@@ -68,6 +73,8 @@ jobs:
     environment: jekyll
     outputs:
       clear_cache: ${{ steps.filter.outputs.clear_cache == 'true' }}
+      built: ${{ steps.build.conclusion == 'success' }}
+      deployed: ${{ steps.wrangler-deploy.conclusion == 'success' }}
     steps:
         # Check out the repo files
       - name: Checkout
@@ -89,6 +96,8 @@ jobs:
           node-version-file: ".node-version"
           package-manager-cache: true
       - name: Node Package Install
+        if: success()
+        id: node
         run: npm install
 
         # Also set up Ruby to build for Jekyll
@@ -98,7 +107,10 @@ jobs:
           bundler-cache: true
           cache-version: ${{ inputs.ruby_cache_version }}
       - name: Build with Jekyll
+        if: success()
+        id: build
         # Outputs to the './_site' directory by default
+        # Please do not change that directory via your configs
         run: bundle exec jekyll build --baseurl ""
         env:
           JEKYLL_ENV: production
@@ -114,7 +126,7 @@ jobs:
       - name: Purge CSS
         # idk why but the output directory is much different than what it is on windows
         # this should fix all of it though
-        if: success()
+        if: ${{ success() && steps.node.conclusion == 'success' }}
         run: npm run purge-ci
 
         # Remove excess files
@@ -130,7 +142,8 @@ jobs:
         # Take everything in our runtime and punt it to Cloudflare
         # Upload directory to CF
       - name: Upload to Cloudflare
-        if: success()
+        if: ${{ success() && steps.node.conclusion == 'success' }}
+        id: wrangler-deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
@@ -139,7 +152,7 @@ jobs:
   # Delete the cloudflare cache after deploy
   clear:
     needs: build
-    if: success() && (needs.build.outputs.clear_cache == 'true' || inputs.force_clear == 'true')
+    if: ${{ needs.build.outputs.deployed == 'true' && (needs.build.outputs.clear_cache == 'true' || inputs.force_clear == 'true') }}
     name: Cloudflare Cache Cleaner
     uses: ./.github/workflows/clear_cache.yml
     secrets:

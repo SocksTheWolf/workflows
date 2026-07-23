@@ -1,4 +1,4 @@
-name: Clean GH Actions
+name: Clean Actions
 on:
   workflow_call:
 
@@ -10,12 +10,11 @@ defaults:
     shell: bash
 
 jobs:
-  # Clean up github job
   cleanup_actions:
-    name: Cleanup Actions
+    name: Clean
     runs-on: ubuntu-latest
     steps:
-      - name: Clean
+      - name: Run
         uses: igorjs/gh-actions-clean-workflow@5fa2e3a4fdd40e3e7098645a0b8df08624352e5e
         id: clean
         with:
@@ -23,6 +22,7 @@ jobs:
           runs_to_keep: 1
           runs_older_than: 0
       - name: Outputs
+        if: success()
         run: |
           echo "Total runs found: ${{ steps.clean.outputs.total-runs-found }}"
           echo "Runs deleted: ${{ steps.clean.outputs.runs-deleted }}"

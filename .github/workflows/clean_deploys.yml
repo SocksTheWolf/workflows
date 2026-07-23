@@ -1,9 +1,9 @@
-name: Clean GH Deploys
+name: Clean Deploys
 on:
   workflow_call:
     inputs:
       environment:
-        description: "The Github Environment to clean up deploys for"
+        description: "The Github environment name to clean up deploys for"
         type: string
         required: true
 
@@ -11,13 +11,12 @@ permissions:
   deployments: write
 
 jobs:
-  # Clean up github job
   clean_deploys:
-    name: Cleanup Deployments
+    name: Clean
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - name: Delete Deploy
+      - name: Delete
         uses: strumwolf/delete-deployment-environment@035f6d27c8b8951729f4d71b2d3d6a7975139476
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

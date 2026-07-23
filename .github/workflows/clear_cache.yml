@@ -1,4 +1,4 @@
-# This workflow requires an environment named Cloudflare or repo settings
+# This workflow requires an environment named "cloudflare" or repo settings
 # with the following:
 #   vars:CLOUDFLARE_ZONE
 #   vars:CLOUDFLARE_ACCOUNT_ID
@@ -15,15 +15,17 @@ on:
         description: "If there are specific URLS to be cleared, this should be a multi-line input. If zone should be cleared, leave blank"
         default: ""
 
+# This action doesn't need any additional permissions
+permissions: {}
+
 defaults:
   run:
     shell: bash
 
 jobs:
   clear_cache:
-    name: Clear Cloudflare Cache
+    name: Run
     runs-on: ubuntu-latest
-    permissions: {}
     environment: cloudflare
     steps:
       - name: Clearing Entire Zone
@@ -32,7 +34,7 @@ jobs:
       - name: Clearing Individual Paths
         if: ${{ inputs.paths != '' }}
         run: echo true
-      - name: Write CF Cache Changes
+      - name: Clear
         uses: Cyb3r-Jak3/action-cloudflare-cache@6ebf798ade84e7ab7da249404e0c3b9aecf54f88
         with:
           zone: ${{ vars.CLOUDFLARE_ZONE }}
