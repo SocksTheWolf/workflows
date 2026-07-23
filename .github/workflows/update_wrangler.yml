@@ -1,7 +1,7 @@
 # Dependabot loves to constantly fail on this one
 # Plus, we usually have to update types
 #
-# So this task handles it.
+# So this task handles it by opening a PR
 name: Update Wrangler Task
 on:
   workflow_call:
@@ -10,10 +10,10 @@ on:
         description: "The working directory for npm"
         type: string
         default: "./"
-      types_file:
-        description: "The location of the types file to also update, if needed"
-        type: string
-        default: ""
+      update_types:
+        description: "If the types file needs to be updated too"
+        type: boolean
+        default: false
     outputs:
       success:
         value: ${{ jobs.update_wrangler.outputs.committed }}
@@ -24,6 +24,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 defaults:
   run:
@@ -36,8 +37,8 @@ concurrency:
 jobs:
   update_wrangler:
     outputs:
-      committed: ${{ steps.commit.outputs.commit-sha != '' }}
-      sha: ${{ steps.commit.outputs.commit-sha }}
+      committed: ${{ steps.commit.outputs.pull-request-operation == 'created' || steps.commit.outputs.pull-request-operation == 'updated' }}
+      sha: ${{ steps.commit.outputs.pull-request-head-sha }}
     runs-on: "ubuntu-latest"
     name: Update Wrangler
     steps:
@@ -62,37 +63,21 @@ jobs:
         run: "npm update wrangler --save-dev"
 
       - name: Update types
-        if: ${{ inputs.types_file != '' }}
+        if: ${{ inputs.update_types == true }}
         run: "npm run types"
 
       - name: Change Back Path
         if: ${{ inputs.npm_directory != './' }}
         run: cd ..
 
-      - name: Make Paths Variable
-        id: paths
-        run: |
-          {
-            echo 'files<<EOF'
-            echo *.json
-            echo $TYPES
-            echo EOF
-          } >> "$GITHUB_ENV"
-        env:
-          TYPES: ${{ inputs.types_file }}
-
-      - name: Check Var Output
-        run: echo $FILE_PATHS
-        env:
-          FILE_PATHS: ${{ steps.paths.outputs.files }}
-
-      - name: Commit Updates
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v8
         id: commit
-        if: ${{ steps.paths.outcome == 'success' }}
-        uses: ryancyq/github-signed-commit@cb9b21ee83578fe8e26a9eda530015aedf0c7c5b
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          commit-message: Committing Wrangler Updates
-          tag-only-if-file-changes: false
-          files: ${{ steps.paths.outputs.files }}
+          sign-commits: true
+          delete-branch: true
+          commit-message: "Update Wrangler"
+          title: "Chore: Wrangler Update"
+          body: "As promised, the update to your wrangler dependencies"
+          branch: "chore/wrangler-update"
+          branch-suffix: timestamp
