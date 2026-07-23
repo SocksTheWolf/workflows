@@ -15,6 +15,7 @@ jobs:
   get-repos:
     name: Get All Repos
     runs-on: ubuntu-latest
+    environment: wrangler-update
     outputs:
       repos: ${{ steps.get-repos.outputs.repos }}
     steps:
@@ -23,6 +24,7 @@ jobs:
         uses: raven-actions/get-repos@main
         with:
           owner: ${{ github.repository_owner }}
+          github-token: ${{ secrets.READ_REPO_TOKEN }}
           topics: "wrangler,test"
           operator: "AND"
 
