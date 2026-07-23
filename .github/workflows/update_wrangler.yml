@@ -69,31 +69,22 @@ jobs:
         if: ${{ inputs.npm_directory != './' }}
         run: cd ..
 
-      - name: Make Paths File
+      - name: Make Paths Variable
+        id: paths
         run: |
-          cat >file_list.txt <<EOL
-            |
-              *.json
-              $TYPES
-          EOL
+          {
+            echo 'files<<EOF'
+            echo *.json
+            echo $TYPES
+            echo EOF
+          } >> "$GITHUB_ENV"
         env:
           TYPES: ${{ inputs.types_file }}
-
-      - name: Check Files Output
-        run: cat file_list.txt
-
-      - name: Build File Paths
-        id: paths
-        if: success()
-        run: echo "resp=$(cat file_list.txt)" >> "$GITHUB_OUTPUT"
 
       - name: Check Var Output
         run: echo $FILE_PATHS
         env:
-          FILE_PATHS: ${{ steps.paths.outputs.resp }}
-
-      - name: Delete file
-        run: "rm -f file_list.txt"
+          FILE_PATHS: ${{ steps.paths.outputs.files }}
 
       - name: Commit Updates
         id: commit
@@ -104,4 +95,4 @@ jobs:
         with:
           commit-message: Committing Wrangler Updates
           tag-only-if-file-changes: false
-          files: ${{ steps.paths.outputs.resp }}
+          files: ${{ steps.paths.outputs.files }}
