@@ -105,16 +105,26 @@ jobs:
         env:
           WORKSPACE: ${{ github.workspace }}
 
+        # Set up the GPG Key for Signing Commits
+      - name: Setup GPG Key
+        id: import-gpg
+        uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+
         # May consider auto committing the update tbh
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
         id: commit
         with:
           token: ${{ secrets.CREATE_PR_TOKEN }}
-          sign-commits: true
           delete-branch: true
           commit-message: "Update Wrangler"
           title: "Chore: Wrangler Update"
           assignees: ${{ github.repository_owner }}
+          committer: "${{ steps.import-gpg.outputs.name }} <${{ steps.import-gpg.outputs.email }}>"
           body: "As promised, the update to your wrangler dependencies"
           branch: "chore/wrangler-update"
