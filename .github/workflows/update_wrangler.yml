@@ -89,4 +89,3 @@ jobs:
           assignees: ${{ inputs.assignees }}
           body: "As promised, the update to your wrangler dependencies"
           branch: "chore/wrangler-update"
-          branch-suffix: timestamp
