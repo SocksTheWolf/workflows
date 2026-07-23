@@ -48,10 +48,10 @@ on:
         description: "This API Token must be able to clear cache and deploy sites/bindings"
     outputs:
       built:
-        value: ${{ jobs.build.outputs.built == 'true' }}
+        value: ${{ jobs.build.outputs.built == true }}
         description: "If the Jekyll site was successfully built"
       deployed:
-        value: ${{ jobs.build.outputs.deployed == 'true' }}
+        value: ${{ jobs.build.outputs.deployed == true }}
         description: "If the site was able to be deployed to Cloudflare"
 
 permissions:
@@ -72,11 +72,11 @@ concurrency:
 
 jobs:
   clean_actions:
-    if: ${{ inputs.should_clean == 'true' }}
+    if: ${{ inputs.should_clean == true }}
     uses: ./.github/workflows/clean_actions.yml
 
   clean_deploys:
-    if: ${{ inputs.should_clean == 'true' }}
+    if: ${{ inputs.should_clean == true }}
     uses: ./.github/workflows/clean_deploys.yml
     with:
       environment: jekyll
@@ -86,7 +86,7 @@ jobs:
     name: Jekyll Build
     environment: jekyll
     outputs:
-      clear_cache: ${{ steps.filter.outputs.clear_cache == 'true' }}
+      clear_cache: ${{ steps.filter.outputs.clear_cache == true }}
       built: ${{ steps.build.conclusion == 'success' }}
       deployed: ${{ steps.wrangler-deploy.conclusion == 'success' }}
     steps:
@@ -131,7 +131,7 @@ jobs:
 
         # Run arbitrary shell for running commands after build
       - name: After Build Execution
-        if: ${{ success() && inputs.needs_after_run == 'true' }}
+        if: ${{ success() && inputs.needs_after_run == true }}
         env:
           TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         run: bash .github/run.sh
@@ -166,7 +166,7 @@ jobs:
   # Delete the cloudflare cache after deploy
   clear:
     needs: build
-    if: ${{ needs.build.outputs.deployed == 'true' && (needs.build.outputs.clear_cache == 'true' || inputs.force_clear == 'true') }}
+    if: ${{ needs.build.outputs.deployed == true && (needs.build.outputs.clear_cache == true || inputs.force_clear == true) }}
     name: Cloudflare Cache Cleaner
     uses: ./.github/workflows/clear_cache.yml
     secrets:

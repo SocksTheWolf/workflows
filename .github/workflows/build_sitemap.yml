@@ -14,7 +14,7 @@ on:
     outputs:
       had_changes:
         description: "If the sitemap did change and was committed"
-        value: ${{ jobs.update.outputs.had_changes == 'true' }}
+        value: ${{ jobs.update.outputs.had_changes == true }}
     secrets:
       GPG_PASSPHRASE:
       GPG_PRIVATE_KEY:
@@ -51,7 +51,7 @@ concurrency:
 
 jobs:
   clean_deploys:
-    if: ${{ inputs.clean_deploys == 'true' }}
+    if: ${{ inputs.clean_deploys == true }}
     uses: ./.github/workflows/clean_deploys.yml
     with:
       environment: sitemap
@@ -62,7 +62,7 @@ jobs:
     permissions:
       contents: write
     outputs:
-      had_changes: ${{ steps.commit.outputs.changes_detected == 'true' }}
+      had_changes: ${{ steps.commit.outputs.changes_detected == true }}
     environment: sitemap
     steps:
         # Grab all files + History
@@ -119,7 +119,7 @@ jobs:
   clear_sitemap_cache:
     name: Clear Sitemap Cache
     needs: update
-    if: ${{ needs.update.outputs.had_changes == 'true' || inputs.force_clear_cache == 'true' }}
+    if: ${{ needs.update.outputs.had_changes == true || inputs.force_clear_cache == true }}
     uses: ./.github/workflows/clear_cache.yml
     with:
       paths: |

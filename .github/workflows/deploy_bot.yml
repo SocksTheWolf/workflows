@@ -28,12 +28,12 @@ on:
         default: false
     outputs:
       restarted:
-        value: ${{ jobs.deploy.outputs.restarted == 'true' }}
+        value: ${{ jobs.deploy.outputs.restarted == true }}
         description: "If the bot was restarted"
       # This is a little bit of a lie, because it only checks to see if the step ran
       # If it failed on the remote side, we don't check the error message here
       synced:
-        value: ${{ jobs.deploy.outputs.synced == 'true' }}
+        value: ${{ jobs.deploy.outputs.synced == true }}
         description: "If the git project on the bot host was updated"
 
 permissions:
@@ -102,7 +102,7 @@ jobs:
     - name: Kill Running Instances
       id: kill_bot
       continue-on-error: true
-      if: steps.check_deps.outputs.update_needed == 'true' || steps.filter.outputs.core_updated == 'true' || inputs.force_restart == 'true'
+      if: steps.check_deps.outputs.update_needed == true || steps.filter.outputs.core_updated == true || inputs.force_restart == true
       run: ssh staging $EXEC_STR
       env:
         EXEC_STR: "cd ${{ inputs.path }} && .runtime/kill.sh"
@@ -117,7 +117,7 @@ jobs:
     # attempt to update any python dependencies
     - name: Update Python Dependencies
       id: deps_update
-      if: ${{ steps.sync.conclusion == 'success' && steps.check_deps.outputs.update_needed == 'true' }}
+      if: ${{ steps.sync.conclusion == 'success' && steps.check_deps.outputs.update_needed == true }}
       continue-on-error: false
       run: ssh staging $EXEC_STR
       env:
