@@ -1,6 +1,7 @@
 # Build, uploads and publishes OpenAPI specs.
 #
-# Must have a openapi environment.
+# Must have an environment named "openapi" or repository variables/secrets.
+#
 # This environment must have:
 #   var:CLOUDFLARE_ZONE
 #   secret:CLOUDFLARE_TOKEN

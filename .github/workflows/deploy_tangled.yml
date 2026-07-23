@@ -1,8 +1,11 @@
-# This workflow requires an environment named "tangled"
-# that has a variable named "MIRROR_REPO" that has
-# the repository path of your project
-name: Tangled Mirror
+# Uploads changes to the current repository to tangled.org
+#
+# This workflow requires an environment named "tangled" or repository secrets/vars
+# with the following:
+#   vars:MIRROR_REPO (repository path of your project on tangled)
+#   secrets:KEY
 
+name: Tangled Mirror
 on:
   workflow_call:
     secrets:

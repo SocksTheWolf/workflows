@@ -1,3 +1,6 @@
+# Cleans up the given environment's Github Deploys
+# Get rid of old deploys and make your page look better with nice badges
+
 name: Clean Deploys
 on:
   workflow_call:

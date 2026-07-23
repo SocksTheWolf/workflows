@@ -1,4 +1,13 @@
-# Builds a sitemap using sscli, then commits it to the repository
+# Builds a sitemap using a node command, then commits it to the repository
+#
+# Uses environment named "sitemap", but you can also just push the secrets in manually.
+#
+# The common builder is to use sscli, but it just runs "npm run sitemap"
+# So make sure your scripts are set properly in your package.json
+#
+# This does use signed commits to add to the repository.
+# No, I'm not going to bother making a workaround for that.
+
 name: Build & Commit Sitemap
 on:
   workflow_call:

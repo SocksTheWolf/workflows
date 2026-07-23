@@ -1,14 +1,17 @@
+# Clears a Cloudflare zone or specific paths in a zone
+#
 # This workflow requires an environment named "cloudflare" or repo settings
 # with the following:
 #   vars:CLOUDFLARE_ZONE
 #   vars:CLOUDFLARE_ACCOUNT_ID
-#   secret:CLOUDFLARE_TOKEN
-name: Clear Cloudflare Cache
+#   secret:CLOUDFLARE_TOKEN (can also be passed)
 
+name: Clear Cloudflare Cache
 on:
   workflow_call:
     secrets:
       CLOUDFLARE_TOKEN:
+        description: "A cloudflare token with the ability to clear cache on the given zone"
     inputs:
       paths:
         type: string

@@ -1,6 +1,6 @@
 # ScamGuard uses this to deploy its python workers.
 #
-# This requires an environment called "production"
+# This requires an environment called "production" to automatically pull down secrets (or have them manually passed)
 # as well as ./github/filters.yml in the repo
 #
 # This filter should define:

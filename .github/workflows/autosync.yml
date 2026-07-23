@@ -4,6 +4,7 @@
 # Needs: contents(write), workflows(write), actions(write)
 #
 # This token should be stored as a WORKFLOW_UPDATE secret
+
 name: Auto Merge From Upstream
 on:
   workflow_dispatch: {}
@@ -72,8 +73,9 @@ jobs:
           echo "Exiting with code $ret_code"
           exit $ret_code
         env:
-          # Swaps
+          # The current repository we are on
           REPO: ${{ github.repository }}
+          # The Github CLI API version we want to use.
           API_VERSION: "2026-03-10"
           # GH CLI uses the value in GH_TOKEN to do operations
           GH_TOKEN: ${{ secrets.WORKFLOW_UPDATE }}

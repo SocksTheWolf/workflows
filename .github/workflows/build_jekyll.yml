@@ -1,14 +1,21 @@
 # Builds, cleans, optimizes and publishes a Jekyll Website onto Cloudflare
 #
 # This requires:
+#
 # * A filter_rules.yml in .github/
 #   * This file must have a rule in it for "clear_cache"
 # * A run.sh in .github/
 #   * But only if needs_after_run is true
-# * An env named jekyll that defines:
-#   * secrets:PERSONAL_TOKEN (optional, can also be passed)
-#   * vars:CLOUDFLARE_ACCOUNT_ID
+# * A Github environment named "jekyll" or repo variables that defines:
+#   * secrets:PERSONAL_TOKEN
 #   * secrets:CLOUDFLARE_TOKEN
+#   * vars:CLOUDFLARE_ACCOUNT_ID
+#
+#   Both secrets can also be manually passed.
+#
+# * package.json that has:
+#   * wrangler
+#   * run script called "purge-ci" (this doesn't actually have to do anything)
 
 name: Build & Deploy Jekyll
 on:
@@ -38,7 +45,7 @@ on:
       PERSONAL_TOKEN:
         description: "Passed to the shell via a $TOKEN flag if needs_after_run is true"
       CLOUDFLARE_TOKEN:
-        description: "This must be able to clear cache and deploy sites/bindings"
+        description: "This API Token must be able to clear cache and deploy sites/bindings"
     outputs:
       built:
         value: ${{ jobs.build.outputs.built == 'true' }}

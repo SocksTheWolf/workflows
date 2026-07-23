@@ -1,3 +1,7 @@
+# Cleans up Github Actions history
+#
+# Great for nuerodivergants!
+
 name: Clean Actions
 on:
   workflow_call:
