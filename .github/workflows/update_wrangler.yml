@@ -85,7 +85,7 @@ jobs:
       - name: Build File Paths
         id: paths
         if: success()
-        run: resp=$(cat file_list.txt) >> "$GITHUB_OUTPUT"
+        run: echo "resp=$(cat file_list.txt)" >> "$GITHUB_OUTPUT"
 
       - name: Check Var Output
         run: echo $FILE_PATHS
