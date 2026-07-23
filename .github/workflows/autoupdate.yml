@@ -88,7 +88,7 @@ jobs:
           if [ -z "$NODE_DIR" ]; then
             cd $NODE_DIR
           fi
-          "npm install wrangler@latest --save-dev"
+          npm install wrangler@latest --save-dev
         env:
           NODE_DIR: ${{ steps.node_directory.outputs.dir }}
 
@@ -117,7 +117,7 @@ jobs:
           if [ -z "$NODE_DIR" ]; then
             cd $NODE_DIR
           fi
-          "npm run types"
+          npm run types
         env:
           NODE_DIR: ${{ steps.node_directory.outputs.dir }}
 
