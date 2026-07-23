@@ -62,6 +62,7 @@ jobs:
         # main is hardcoded here because cron scripts cannot run on any
         # branch besides the default one (which is main across all projects)
         run: |
+          echo "Running merge-upstream..."
           response=$(gh api --method POST -H 'Accept: application/vnd.github+json' -H "X-GitHub-Api-Version: $API_VERSION" /repos/$REPO/merge-upstream -f 'branch=main')
           ret_code=$?
           readonly response

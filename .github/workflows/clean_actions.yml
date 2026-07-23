@@ -32,6 +32,7 @@ jobs:
       - name: Outputs
         if: success()
         run: |
+          echo "Run Output:"
           echo "Total runs found: ${{ steps.clean.outputs.total-runs-found }}"
           echo "Runs deleted: ${{ steps.clean.outputs.runs-deleted }}"
           echo "Runs failed: ${{ steps.clean.outputs.runs-failed }}"

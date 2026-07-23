@@ -113,6 +113,7 @@ jobs:
       - name: Check If File Exists
         id: spec_check
         run: |
+          echo "Check for openapi.json file"
           if test -f "openapi.json"; then
             echo "has_file=true" >> $GITHUB_OUTPUT
             echo "File Exists"
