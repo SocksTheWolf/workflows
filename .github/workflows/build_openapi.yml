@@ -59,7 +59,7 @@ concurrency:
 
 jobs:
   clean_deploys:
-    if: ${{ inputs.clean_deploys == 'true' }}
+    if: ${{ inputs.clean_deploys == true }}
     uses: ./.github/workflows/clean_deploys.yml
     with:
       environment: openapi
