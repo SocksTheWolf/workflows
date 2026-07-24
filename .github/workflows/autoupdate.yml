@@ -88,9 +88,9 @@ jobs:
         run: |
           check_field=$(echo "$JSON_DATA" | jq -r .types)
           if [[ "$check_field" != null ]]; then
-            echo "has_data=true" >> "$GITHUB_OUTPUT"
+            echo "has_types=true" >> "$GITHUB_OUTPUT"
           else
-            echo "has_data=false" >> "$GITHUB_OUTPUT"
+            echo "has_types=false" >> "$GITHUB_OUTPUT"
           fi
         env:
           JSON_DATA: ${{ steps.package_read.outputs.scripts }}
@@ -123,7 +123,7 @@ jobs:
           fi
         env:
           NODE_DIR: ${{ steps.node_directory.outputs.dir }}
-          NEEDS_TYPES: ${{ steps.type_check.outputs.has_data == 'true' }}
+          NEEDS_TYPES: ${{ steps.type_check.outputs.has_types == 'true' }}
 
         # Set up the GPG Key for Signing Commits
       - name: Setup GPG Key
