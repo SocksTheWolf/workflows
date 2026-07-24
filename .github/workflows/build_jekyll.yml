@@ -114,7 +114,6 @@ jobs:
           node-version-file: ".node-version"
           package-manager-cache: true
       - name: Node Package Install
-        if: success()
         id: node
         run: npm install
 
@@ -125,7 +124,6 @@ jobs:
           bundler-cache: true
           cache-version: ${{ inputs.ruby_cache_version }}
       - name: Build with Jekyll
-        if: success()
         id: build
         # Outputs to the './_site' directory by default
         # Please do not change that directory via your configs

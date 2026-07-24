@@ -124,7 +124,6 @@ jobs:
 
         # If we have the file, upload it to CF API Shield
       - name: Upload Spec to API Shield
-        if: success()
         id: upload
         uses: socksthewolf/cloudflare-upload-spec@4aa5efd32ce6fc898dcb794ccd7e3001568cce10
         with:
@@ -134,7 +133,6 @@ jobs:
 
         # Additionally, save it to our GH artifacts
       - name: Upload Spec as Artifact
-        if: success()
         uses: actions/upload-artifact@v7
         with:
           name: openapi-spec-${{ inputs.ref }}

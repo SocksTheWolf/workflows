@@ -31,7 +31,6 @@ jobs:
           runs_to_keep: 1
           runs_older_than: 0
       - name: Outputs
-        if: success()
         run: |
           echo "Run Output:"
           echo "Total runs found: ${{ steps.clean.outputs.total-runs-found }}"

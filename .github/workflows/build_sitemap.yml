@@ -74,7 +74,6 @@ jobs:
 
         # Fix modification timestamps
       - name: Fix Timestamps
-        if: success()
         uses: chetan/git-restore-mtime-action@d186aca54f8760da4dec55313195e51ed3ebb0b3
         with:
           args: --no-directories --skip-missing
@@ -88,13 +87,11 @@ jobs:
           package-manager-cache: true
         # Install packages
       - name: Install and Build Sitemap
-        if: success()
         run: npm install && npm run sitemap
 
         # Set up the GPG Key for Signing Commits
       - name: Setup GPG Key
         id: import-gpg
-        if: success()
         uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -104,7 +101,6 @@ jobs:
 
         # Commit Sitemap Changes (if Any)
       - name: Commit the Changes
-        if: success()
         id: commit
         uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d
         with:

@@ -27,6 +27,7 @@ jobs:
     steps:
       - name: Query Repositories
         id: get-repos
+        # I'd love to pin this to an SHA but it hasn't had a safe release in three years :(
         uses: raven-actions/get-repos@main
         with:
           owner: ${{ github.repository_owner }}
@@ -39,8 +40,7 @@ jobs:
     if: ${{ needs.get-repos.outputs.repos != '[]' }} # make sure repos exist
     runs-on: ubuntu-latest
     environment: wrangler-update
-    needs:
-      - get-repos
+    needs: get-repos
     strategy:
       matrix:
         repo: ${{ fromJson(needs.get-repos.outputs.repos) }}
@@ -84,7 +84,7 @@ jobs:
 
       - name: Check for types
         id: type_check
-        if: ${{ steps.package_read.outputs.scripts }}
+        if: ${{ success() && steps.package_read.outputs.scripts }}
         run: |
           check_field=$(echo "$JSON_DATA" | jq -r .types)
           if [[ "$check_field" != null ]]; then
