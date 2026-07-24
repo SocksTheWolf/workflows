@@ -24,8 +24,7 @@ on:
         value: ${{ jobs.sync.result == 'success'}}
         description: "If the sync operation completed successfully"
 
-  # I don't know why, but it appears that this cron is never running
-  # And it's completely mysterious.
+  # Changes to the cron schedule are only picked up after a day
   schedule:
     - cron: '12,21,33,42,58 * * * *'
 
