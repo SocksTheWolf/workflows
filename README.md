@@ -1,6 +1,6 @@
 # Reusable Workflows
 
-Because I'm tired of updating every individual repository with new action versions.
+Because I'm tired of updating every individual repository by hand every time a new action pushes.
 
 It's always the same couple of fixes for the same workflows and god forbid any of them have a vulnerability referenced.
 
@@ -8,7 +8,14 @@ So now it's one place to manage my workflows that can be used across orgs/repos.
 
 ## Notes
 
-### On Secrets
+### Auto Scripts
+
+There are two auto scripts.
+
+- `auto_sync.yml` - Will keep all other forked repos in sync with the base repository
+- `auto_update_wrangler.yml` - Will query all other repos within the org/user and update wrangler/node for them if necessary.
+
+### Secrets
 
 **tl:dr**: If you want to use the secrets without passing them explicitly in an org, you _must_ fork the repo.
 
@@ -32,7 +39,7 @@ Secrets are funny, there are some undocumented quirks about them:
 
 ---
 
-### On Forking
+### Forks
 
 You must:
 
@@ -53,6 +60,7 @@ Once done, it may take a day before scheduled actions run.
 | `clean_actions.yml` | `clean_actions` | true | N/A |
 | `clean_deploys.yml` | `clean_deploys` | false | max |
 | `clear_cache.yml` | `cloudflare_cache` | true | N/A |
-| `autosync.yml` | `autosync` | true | N/A |
+| `auto_sync.yml` | `autosync` | true | N/A |
+| `auto_update_wrangler.yml` | `wrangler` | false | single |
 
 Max Queueing is 100 jobs.

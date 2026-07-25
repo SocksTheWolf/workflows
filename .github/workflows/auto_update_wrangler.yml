@@ -107,7 +107,8 @@ jobs:
           token: ${{ secrets.CREATE_PR_TOKEN || secrets.GITHUB_TOKEN }}
           repository: ${{ matrix.repo.full_name }}
 
-      - name: Find Node Directory
+      - name: |-
+          ${{ format('Node: Find Directory') }}
         id: node_directory
         # Welcome to the hack zone, I hate it here
         #
@@ -165,19 +166,33 @@ jobs:
           SCRIPT_DATA: ${{ steps.package_read.outputs.scripts }}
           DEV_DEPENDS: ${{ steps.package_read.outputs.devDependencies }}
 
-      - name: Check ${{ case(env.FORCE_NODE_VERSION == 'true', '& Update ', '') }}Node Version
+      - name: |-
+          ${{ format('Node: Check{0}Version', case(env.FORCE_NODE_VERSION == 'true', ' & Update Any ', ' ')) }}
         id: node_version
         run: |
           echo "Checking Node Version..."
+          # Add .node-version if it's missing for whatever reason
+          # (like I forgot or something)
+          #
+          # NOTE: This will bypass any .node-lock files
+          if [[ ! -f "$VERSION_FILE" ]]; then
+            echo "Repo does not have a .node-version file, adding it to version $NODE_VERSION!"
+            echo "$NODE_VERSION" > "$VERSION_FILE"
+            echo "node_version=$NODE_VERSION" >> "$GITHUB_OUTPUT"
+            echo "updated_node=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           # Read Contents of .node-version
           current_version=$(cat "$VERSION_FILE")
           echo "Currently using $current_version"
 
           # Check to see if we have a .node-lock file
           # if we do, do not update the version below.
-          if [[ -e "$VERSION_LOCK" ]]; then
+          if [[ -f "$VERSION_LOCK" ]]; then
             echo "Version lock file exists, locking to $current_version"
             echo "node_version=$current_version" >> "$GITHUB_OUTPUT"
+            echo "updated_node=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -185,16 +200,27 @@ jobs:
             echo "Current version is v$current_version, updating to v$NODE_VERSION"
             echo "$NODE_VERSION" > "$VERSION_FILE"
             echo "node_version=$NODE_VERSION" >> "$GITHUB_OUTPUT"
+            echo "updated_node=true" >> "$GITHUB_OUTPUT"
           else
             echo "Node version is up to date"
             echo "node_version=$current_version" >> "$GITHUB_OUTPUT"
+            echo "updated_node=false" >> "$GITHUB_OUTPUT"
           fi
         env:
           VERSION_FILE: ${{ steps.node_directory.outputs.ver }}
           VERSION_LOCK: ${{ steps.node_directory.outputs.ver_lock }}
           NODE_VERSION: ${{ env.GLOBAL_NODE_VERSION }}
 
-      - name: Install Node v${{ steps.node_version.outputs.node_version }}
+        # Easy to see from the matrix if any node versions were updated
+      - name: |-
+          ${{ case(steps.node_version.outputs.updated_node == 'true',
+            format('Node: Updated to v{0}', steps.node_version.outputs.node_version),
+            'Node: No Update Needed') }}
+        if: ${{ steps.node_version.outputs.updated_node == 'true' }}
+        run: echo "version status"
+
+      - name: |-
+          ${{ format('Node: Install v{0}', steps.node_version.outputs.node_version) }}
         id: node
         uses: actions/setup-node@v7
         with:
@@ -203,7 +229,8 @@ jobs:
           node-version-file: ${{ steps.node_directory.outputs.ver }}
           package-manager-cache: true
 
-      - name: Install Wrangler ${{ case(steps.pkg_check.outputs.has_types_command == 'true', '& Build Types', '') }}
+      - name: |-
+          Install Wrangler ${{ case(steps.pkg_check.outputs.has_types_command == 'true', '& Build Types', '') }}
         run: |
           echo "Running updates..."
           # Move to the correct working directory
