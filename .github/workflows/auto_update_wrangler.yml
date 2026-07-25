@@ -111,9 +111,13 @@ jobs:
         run: |
           # Check for npm run types
           check_script_types=$(echo "$SCRIPT_DATA" | jq -r .types)
+          echo "$check_script_types"
+          echo "$SCRIPT_DATA"
           if [[ "$check_script_types" != null ]]; then
+            echo "Has npm run types"
             echo "has_types_command=true" >> "$GITHUB_OUTPUT"
           else
+            echo "Does not have npm run types"
             echo "has_types_command=false" >> "$GITHUB_OUTPUT"
           fi
 
@@ -131,8 +135,10 @@ jobs:
       - name: Check ${{ case(env.FORCE_NODE_VERSION == 'true', '& Update ', '') }}Node Version
         id: node_version
         run: |
+          echo "Checking Node Version..."
           # Read Contents of .node-version
           current_version=$(cat "$VERSION_FILE")
+          echo "Currently using $current_version"
 
           # TODO: Probably consolidate these conditionals
           #
@@ -168,6 +174,7 @@ jobs:
 
       - name: Install Wrangler ${{ case(steps.type_check.outputs.has_types_command == 'true', '& Build Types', '') }}
         run: |
+          echo "Running updates..."
           # Move to the correct working directory
           if [ -n "$NODE_DIR" ]; then
             echo "moved directory to $NODE_DIR"
@@ -218,8 +225,8 @@ jobs:
         env:
           IN_AUTHOR: |-
             ${{ case(env.SIGN_COMMITS == 'true',
-              format('"${0} <${1}>"', steps.import-gpg.outputs.name, steps.import-gpg.outputs.email),
-              format('"${0} <${1}>"', env.DEFAULT_USERNAME, env.DEFAULT_EMAIL)
+              format('"{0} <{1}>"', steps.import-gpg.outputs.name, steps.import-gpg.outputs.email),
+              format('"{0} <{1}>"', env.DEFAULT_USERNAME, env.DEFAULT_EMAIL)
             ) }}
           IN_NAME: ${{ case(env.SIGN_COMMITS == 'true', steps.import-gpg.outputs.name, env.DEFAULT_USERNAME) }}
           IN_EMAIL: ${{ case(env.SIGN_COMMITS == 'true', steps.import-gpg.outputs.email, env.DEFAULT_EMAIL) }}
