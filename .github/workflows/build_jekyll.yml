@@ -88,8 +88,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Jekyll Build
     environment: jekyll
-    env:
-      NODE_VERSION: "24.17"
     outputs:
       # path filters is a string output, but booleans are different here
       clear_cache: ${{ steps.filter.outputs.clear_cache == 'true' }}
@@ -113,7 +111,7 @@ jobs:
         uses: actions/setup-node@v7
         with:
           cache: "npm"
-          node-version: ${{ env.NODE_VERSION }}
+          node-version-file: ".node-version"
           package-manager-cache: true
       - name: Node Package Install
         id: node
@@ -161,7 +159,7 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-        run: npm run deploy
+        run: npx wrangler deploy
 
   # Delete the cloudflare cache after deploy
   clear:
