@@ -235,7 +235,7 @@ jobs:
           NEEDS_CF_TYPES: ${{ steps.pkg_check.outputs.has_cf_types == 'true' }}
 
         # Set up the GPG Key for Signing Commits
-      - name: ${{ case(env.SIGN_COMMITS == 'true', 'Doing:', 'Skipping:') }} "Setup GPG Key"
+      - name: ${{ case(env.SIGN_COMMITS == 'true', 'Doing:', 'Skipping:') }} Setup GPG Key
         id: import-gpg
         if: ${{ env.SIGN_COMMITS == 'true' }}
         uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd
@@ -275,7 +275,10 @@ jobs:
           # All Commits are Signed
           commit_options: ${{ case(env.SIGN_COMMITS == 'true', '-S', '') }}
 
-      - name: ${{ case(env.AUTO_COMMIT == 'true', case(steps.commit.outputs.changes_detected == 'true', 'Committed', 'No Commits Needed'), 'Uses PRs') }}
+      - name: |-
+          ${{ case(env.AUTO_COMMIT == 'true',
+          format('Commit Result: {0}', case(steps.commit.outputs.changes_detected == 'true', 'Committed', 'No Changes')),
+          'Skipped: Uses PRs') }}
         if: ${{ success() && steps.commit.outcome == 'success' }}
         run: echo "Commit Result!"
 
@@ -294,6 +297,9 @@ jobs:
           body: "All Wrangler + Safe Packages have been updated"
           branch: "chore/wrangler-update"
 
-      - name: ${{ case(env.AUTO_COMMIT == 'false', case(steps.pull-request.outputs.pull-request-number, 'PR Created', 'No PR Necessary'), 'Uses Commits') }}
+      - name: |-
+          ${{ case(env.AUTO_COMMIT == 'false',
+            format('PR Result: {0}', case(steps.pull-request.outputs.pull-request-number, 'Created', 'Not Necessary')),
+            'Skipped: Uses Commits') }}
         if: ${{ success() && steps.pull-request.outcome == 'success' }}
         run: echo "PR Result!"
