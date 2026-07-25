@@ -57,6 +57,8 @@ on:
 
 permissions:
   contents: read
+  # Definitely needed for "should_clean"
+  # but due to GH quirks, you need to specify this anyways, even if you don't use this option
   actions: write
   deployments: write
 

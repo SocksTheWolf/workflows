@@ -13,7 +13,9 @@ on:
         description: "The SHA key for your tangled repo"
 
 permissions:
+  # To read the current repo so that we can push to tangled
   contents: read
+  # To clean the deployments
   deployments: write
 
 concurrency:

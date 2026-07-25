@@ -5,6 +5,7 @@
 #
 # It is recommended to have an environment named wrangler-update,
 # but you can also just set it in the repository secrets
+
 name: Auto Update Wrangler
 on:
   push:

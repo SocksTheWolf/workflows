@@ -37,7 +37,9 @@ on:
         default: false
 
 permissions:
+  # To push commits
   contents: write
+  # To clean deployments
   deployments: write
 
 defaults:

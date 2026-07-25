@@ -45,7 +45,9 @@ on:
 
 permissions:
   contents: read
+  # To upload to artifacts
   actions: write
+  # To clean deployments (even if off, this permission must still be granted)
   deployments: write
 
 defaults:

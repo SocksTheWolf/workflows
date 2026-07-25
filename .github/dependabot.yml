@@ -1,13 +1,15 @@
 version: 2
 updates:
-  - package-ecosystem: "github-actions" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 7
     ignore:
+      # ignore ruby as it updates all the time
       - dependency-name: 'ruby/setup-ruby'
-  # node updates
+
+  # node updates (it's a fake install to trick dependabot to keep track of wrangler for us)
   - package-ecosystem: "npm"
     directory: "/wrangler-updates"
     open-pull-requests-limit: 2
