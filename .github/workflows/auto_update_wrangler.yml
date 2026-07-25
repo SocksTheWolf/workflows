@@ -1,11 +1,19 @@
+# Updates all repositories with either the wrangler or cloudflare tag that you own
+#
+# This will not work on any repositories that are technically forks, even if forked with the intent to not push back to mainline.
+# The only fix to this is to disconnect from the fork network
+#
+# It is recommended to have an environment named wrangler-update,
+# but you can also just set it in the repository secrets
 name: Auto Update Wrangler
 on:
   push:
     branches: "main"
+    # Run whenever this script updates
     paths:
       - ".github/workflows/auto_update_wrangler.yml"
 
-  workflow_dispatch:
+  workflow_dispatch: {}
 
 # Probably could consolidate the bash scripts, but w/e
 defaults:
@@ -17,17 +25,20 @@ concurrency:
   cancel-in-progress: false
   queue: single
 
+# Necessary for clean_actions, all other cases have more scoped permissions
 permissions:
   actions: write
 
 jobs:
-  clean_actions:
+  clean-actions:
     uses: ./.github/workflows/clean_actions.yml
 
   get-repos:
-    name: Get All Repos
+    name: Query Wrangler Repos
     runs-on: ubuntu-latest
     environment: wrangler-update
+    permissions:
+      contents: read
     outputs:
       repos: ${{ steps.get-repos.outputs.repos }}
     steps:
@@ -37,37 +48,53 @@ jobs:
         uses: raven-actions/get-repos@main
         with:
           owner: ${{ github.repository_owner }}
+          # You should pass a token that is NOT the WRITE_PR secret
           github-token: ${{ secrets.READ_REPO_TOKEN }}
           topics: "wrangler,cloudflare"
           operator: "OR"
 
   sync-repos:
     name: Update Wrangler For (${{ matrix.repo.name }})
+    runs-on: ubuntu-latest
+    needs: get-repos
     # make sure repos exist
     if: ${{ needs.get-repos.outputs.repos != '[]' }}
-    runs-on: ubuntu-latest
     environment: wrangler-update
-    needs: get-repos
-    # If signing is off or the only repos being used are public
-    permissions:
-      contents: write
-      pull-requests: write
+
     # Actual Config Settings
     env:
+      # The name of the cloudflare workers types package
       WORKERS_TYPES: "@cloudflare/workers-types"
+
+      # If we should force all repositories to use a specific version of node
+      #
+      # NOTE: this will also write .node-version to whatever the version of GLOBAL_NODE_VERSION is.
+      # This can be turned off per repo by adding a file named .node-lock
       FORCE_NODE_VERSION: "false"
+      # The global node version
       GLOBAL_NODE_VERSION: "24.17"
-      COMMIT_MESSAGE: "Update Wrangler"
+
       # If we should commit the changes immediately or open a pull request
       AUTO_COMMIT: "true"
+
+      # The commit message. If a Pull Request is being opened, this is the title of the pull request.
+      COMMIT_MESSAGE: "Update Wrangler"
       # If opening a pull request, who is the assignee of the PR?
       PR_ASSIGN_TO: ${{ github.actor }}
+
       # If commits should be signed. If true, the commits will show up as whatever's in your GPG key
       # Otherwise, it will be github-actions[bot]
       SIGN_COMMITS: "true"
+
       # These are unused if SIGN_COMMITS == 'true'
       DEFAULT_USERNAME: ${{ github.actor }}
       DEFAULT_EMAIL: ""
+
+    # If signing is off or the only repos being used are public
+    # then these permissions are used
+    permissions:
+      contents: write
+      pull-requests: write
     strategy:
       matrix:
         repo: ${{ fromJson(needs.get-repos.outputs.repos) }}
@@ -76,7 +103,8 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v7
         with:
-          token: ${{ secrets.CREATE_PR_TOKEN }}
+          persist-credentials: true
+          token: ${{ secrets.CREATE_PR_TOKEN || secrets.GITHUB_TOKEN }}
           repository: ${{ matrix.repo.full_name }}
 
       - name: Find Node Directory
@@ -223,9 +251,15 @@ jobs:
         id: precommit
         run: |
           echo "Preparing for deployment..."
+          echo "author=$IN_AUTHOR" >> "$GITHUB_OUTPUT"
           echo "email=$IN_EMAIL" >> "$GITHUB_OUTPUT"
           echo "name=$IN_NAME" >> "$GITHUB_OUTPUT"
         env:
+          IN_AUTHOR: |-
+            ${{ case(env.SIGN_COMMITS == 'true',
+              format('{0} <{1}>', steps.import-gpg.outputs.name, steps.import-gpg.outputs.email),
+              format('{0} <{1}>', env.DEFAULT_USERNAME, env.DEFAULT_EMAIL)
+            ) }}
           IN_NAME: ${{ case(env.SIGN_COMMITS == 'true', steps.import-gpg.outputs.name, env.DEFAULT_USERNAME) }}
           IN_EMAIL: ${{ case(env.SIGN_COMMITS == 'true', steps.import-gpg.outputs.email, env.DEFAULT_EMAIL) }}
 
@@ -234,7 +268,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d
         with:
           commit_message: ${{ env.COMMIT_MESSAGE }}
-          commit_author: "${{ steps.precommit.outputs.name }} <${{ steps.precommit.outputs.email }}>"
+          commit_author: ${{ steps.precommit.outputs.author }}
           commit_user_name: ${{ steps.precommit.outputs.name }}
           commit_user_email: ${{ steps.precommit.outputs.email }}
           # All Commits are Signed
@@ -244,12 +278,12 @@ jobs:
         if: ${{ success() && env.AUTO_COMMIT == 'false' }}
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
         with:
-          token: ${{ case(env.SIGN_COMMITS == 'true', secrets.CREATE_PR_TOKEN, secrets.GITHUB_TOKEN) }}
+          token: ${{ case(env.SIGN_COMMITS == 'true', secrets.CREATE_PR_TOKEN || secrets.GITHUB_TOKEN, secrets.GITHUB_TOKEN) }}
           delete-branch: true
           commit-message: ${{ env.COMMIT_MESSAGE }}
           sign-commits: ${{ case(env.SIGN_COMMITS == 'true', false, true) }}
           title: "Chore: Wrangler Update"
           assignees: ${{ env.PR_ASSIGN_TO }}
-          committer: "${{ steps.precommit.outputs.name }} <${{ steps.precommit.outputs.email }}>"
+          committer: ${{ steps.precommit.outputs.author }}
           body: "All Wrangler + Safe Packages have been updated"
           branch: "chore/wrangler-update"
