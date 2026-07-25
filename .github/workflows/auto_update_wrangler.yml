@@ -1,5 +1,10 @@
 name: Auto Update Wrangler
 on:
+  push:
+    branches: "main"
+    paths:
+      - ".github/workflows/auto_update_wrangler.yml"
+
   workflow_dispatch:
 
 defaults:
@@ -176,7 +181,7 @@ jobs:
           npm install wrangler@latest --save-dev
 
           # Install Workers Types if needed
-          if [[ "$NEEDS_CF_TYPES" == "true "]]; then
+          if [[ "$NEEDS_CF_TYPES" == "true" ]]; then
             echo "Install latest CF types..."
             npm install $WORKERS_TYPES@latest --save-dev
           fi
