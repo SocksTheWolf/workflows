@@ -223,16 +223,14 @@ jobs:
         id: precommit
         run: |
           echo "Preparing for deployment..."
-          # Author is formatted via the input, so it should not be wrapped into a string (as it already is)
           echo "author=$IN_AUTHOR" >> "$GITHUB_OUTPUT"
-          # Everything else does need to be wrapped in a string
-          echo "email=\"$IN_EMAIL\"" >> "$GITHUB_OUTPUT"
-          echo "name=\"$IN_NAME\"" >> "$GITHUB_OUTPUT"
+          echo "email=$IN_EMAIL" >> "$GITHUB_OUTPUT"
+          echo "name=$IN_NAME" >> "$GITHUB_OUTPUT"
         env:
           IN_AUTHOR: |-
             ${{ case(env.SIGN_COMMITS == 'true',
-              format('"{0} <{1}>"', steps.import-gpg.outputs.name, steps.import-gpg.outputs.email),
-              format('"{0} <{1}>"', env.DEFAULT_USERNAME, env.DEFAULT_EMAIL)
+              format('{0} <{1}>', steps.import-gpg.outputs.name, steps.import-gpg.outputs.email),
+              format('{0} <{1}>', env.DEFAULT_USERNAME, env.DEFAULT_EMAIL)
             ) }}
           IN_NAME: ${{ case(env.SIGN_COMMITS == 'true', steps.import-gpg.outputs.name, env.DEFAULT_USERNAME) }}
           IN_EMAIL: ${{ case(env.SIGN_COMMITS == 'true', steps.import-gpg.outputs.email, env.DEFAULT_EMAIL) }}
