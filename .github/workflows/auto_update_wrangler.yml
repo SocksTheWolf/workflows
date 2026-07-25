@@ -76,7 +76,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v7
         with:
-          token: ${{ secrets.READ_REPO_TOKEN }}
+          persist-credentials: true
           repository: ${{ matrix.repo.full_name }}
 
       - name: Find Node Directory
@@ -238,7 +238,7 @@ jobs:
           commit_user_name: ${{ steps.precommit.outputs.name }}
           commit_user_email: ${{ steps.precommit.outputs.email }}
           # All Commits are Signed
-          commit_options: ${{ case(env.SIGN_COMMITS == 'true', '-S', '')}}
+          commit_options: ${{ case(env.SIGN_COMMITS == 'true', '-S', '') }}
 
       - name: ${{ case(env.AUTO_COMMIT == 'false', 'Doing:', 'Skipping:') }} Create Pull Request
         if: ${{ success() && env.AUTO_COMMIT == 'false' }}
