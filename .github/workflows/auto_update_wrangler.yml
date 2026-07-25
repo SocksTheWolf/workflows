@@ -223,15 +223,9 @@ jobs:
         id: precommit
         run: |
           echo "Preparing for deployment..."
-          echo "author=$IN_AUTHOR" >> "$GITHUB_OUTPUT"
           echo "email=$IN_EMAIL" >> "$GITHUB_OUTPUT"
           echo "name=$IN_NAME" >> "$GITHUB_OUTPUT"
         env:
-          IN_AUTHOR: |-
-            ${{ case(env.SIGN_COMMITS == 'true',
-              format('{0} <{1}>', steps.import-gpg.outputs.name, steps.import-gpg.outputs.email),
-              format('{0} <{1}>', env.DEFAULT_USERNAME, env.DEFAULT_EMAIL)
-            ) }}
           IN_NAME: ${{ case(env.SIGN_COMMITS == 'true', steps.import-gpg.outputs.name, env.DEFAULT_USERNAME) }}
           IN_EMAIL: ${{ case(env.SIGN_COMMITS == 'true', steps.import-gpg.outputs.email, env.DEFAULT_EMAIL) }}
 
@@ -240,7 +234,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d
         with:
           commit_message: ${{ env.COMMIT_MESSAGE }}
-          commit_author: ${{ steps.precommit.outputs.author }}
+          commit_author: "${{ steps.precommit.outputs.name }} <${{ steps.precommit.outputs.email }}>"
           commit_user_name: ${{ steps.precommit.outputs.name }}
           commit_user_email: ${{ steps.precommit.outputs.email }}
           # All Commits are Signed
@@ -256,6 +250,6 @@ jobs:
           sign-commits: ${{ case(env.SIGN_COMMITS == 'true', false, true) }}
           title: "Chore: Wrangler Update"
           assignees: ${{ env.PR_ASSIGN_TO }}
-          committer: ${{ steps.precommit.outputs.author }}
+          committer: "${{ steps.precommit.outputs.name }} <${{ steps.precommit.outputs.email }}>"
           body: "All Wrangler + Safe Packages have been updated"
           branch: "chore/wrangler-update"
