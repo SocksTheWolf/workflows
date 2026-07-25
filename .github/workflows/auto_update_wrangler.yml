@@ -113,7 +113,7 @@ jobs:
           fi
 
           # Check for CF workers type usage
-          check_dev_depends=$(echo "$DEV_DEPENDS" | jq -r ."$WORKERS_TYPES")
+          check_dev_depends=$(echo "$DEV_DEPENDS" | jq -r ."\"$WORKERS_TYPES\"")
           if [[ "$check_dev_depends" != null ]]; then
             echo "has_cf_types=true" >> "$GITHUB_OUTPUT"
           else
