@@ -52,10 +52,10 @@ on:
         description: "This API Token must be able to clear cache and deploy sites/bindings"
     outputs:
       built:
-        value: ${{ jobs.build.outputs.built == true }}
+        value: ${{ jobs.build.outputs.built == 'true' }}
         description: "If the Jekyll site was successfully built"
       deployed:
-        value: ${{ jobs.build.outputs.deployed == true }}
+        value: ${{ jobs.build.outputs.deployed == 'true' }}
         description: "If the site was able to be deployed to Cloudflare"
 
 permissions:
@@ -170,7 +170,7 @@ jobs:
   # Delete the cloudflare cache after deploy
   clear:
     needs: build
-    if: ${{ needs.build.outputs.deployed == true && (needs.build.outputs.clear_cache == true || inputs.force_clear == true) }}
+    if: ${{ needs.build.outputs.deployed == 'true' && (needs.build.outputs.clear_cache == 'true' || inputs.force_clear == true) }}
     name: Cloudflare Cache Cleaner
     uses: ./.github/workflows/clear_cache.yml
     secrets:

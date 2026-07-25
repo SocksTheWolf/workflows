@@ -21,7 +21,7 @@ on:
         value: ${{ jobs.sync.outputs.merge_type }}
         description: "Merge operation that was performed"
       success:
-        value: ${{ jobs.sync.result == 'success'}}
+        value: ${{ jobs.sync.result == 'success' }}
         description: "If the sync operation completed successfully"
 
   # Changes to the cron schedule are only picked up after a day

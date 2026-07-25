@@ -28,12 +28,12 @@ on:
         default: false
     outputs:
       restarted:
-        value: ${{ jobs.deploy.outputs.restarted == true }}
+        value: ${{ jobs.deploy.outputs.restarted == 'true' }}
         description: "If the bot was restarted"
       # This is a little bit of a lie, because it only checks to see if the step ran
       # If it failed on the remote side, we don't check the error message here
       synced:
-        value: ${{ jobs.deploy.outputs.synced == true }}
+        value: ${{ jobs.deploy.outputs.synced == 'true' }}
         description: "If the git project on the bot host was updated"
 
 permissions:
