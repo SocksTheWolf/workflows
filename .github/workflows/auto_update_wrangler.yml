@@ -1,4 +1,4 @@
-name: Auto Wrangler Updates
+name: Auto Update Wrangler
 on:
   workflow_dispatch:
 
