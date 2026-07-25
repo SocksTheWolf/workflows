@@ -5,7 +5,7 @@
 # * A filter_rules.yml in .github/
 #   * This file must have a rule in it for "clear_cache"
 # * A run.sh in .github/
-#   * But only if needs_after_run is true
+#   * But only if "needs_after_run" is true
 # * A Github environment named "jekyll" or repo variables that defines:
 #   * secrets:PERSONAL_TOKEN
 #   * secrets:CLOUDFLARE_TOKEN
@@ -15,7 +15,7 @@
 #
 # * package.json that has:
 #   * wrangler
-#   * run script called "purge-ci" (this doesn't actually have to do anything)
+#   * purgecss
 
 name: Build & Deploy Jekyll
 on:
@@ -37,14 +37,11 @@ on:
         description: "The Ruby cache storage number"
         type: number
         default: 1
-      remove_feeds:
-        description: "If jekyll feeds should be removed automatically"
-        type: boolean
-        default: true
       needs_after_run:
         description: "If we should execute a shell script after running the build"
         type: boolean
         default: false
+        required: true
     secrets:
       PERSONAL_TOKEN:
         description: "Passed to the shell via a $TOKEN flag if needs_after_run is true"
@@ -77,10 +74,12 @@ concurrency:
 jobs:
   clean_actions:
     if: ${{ inputs.should_clean == true }}
+    name: Actions
     uses: ./.github/workflows/clean_actions.yml
 
   clean_deploys:
     if: ${{ inputs.should_clean == true }}
+    name: Deploys
     uses: ./.github/workflows/clean_deploys.yml
     with:
       environment: jekyll
@@ -89,6 +88,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Jekyll Build
     environment: jekyll
+    env:
+      NODE_VERSION: "24.17"
     outputs:
       # path filters is a string output, but booleans are different here
       clear_cache: ${{ steps.filter.outputs.clear_cache == 'true' }}
@@ -112,7 +113,7 @@ jobs:
         uses: actions/setup-node@v7
         with:
           cache: "npm"
-          node-version-file: ".node-version"
+          node-version: ${{ env.NODE_VERSION }}
           package-manager-cache: true
       - name: Node Package Install
         id: node
@@ -141,17 +142,12 @@ jobs:
 
         # Minimize/Purge any excess CSS rules that are unused
       - name: Purge CSS
-        # idk why but the output directory is much different than what it is on windows
-        # this should fix all of it though
         if: ${{ success() && steps.node.conclusion == 'success' }}
-        run: npm run purge-ci
+        run: npx purgecss --config ./purgecss.config.cjs --output _site/assets/css
 
         # Remove excess files
-      - name: No Source Maps
-        run: rm -rf _site/assets/**/*.map
-      - name: Remove All Feeds
-        if: ${{ inputs.remove_feeds == true }}
-        run: rm -f _site/feed.xml
+      - name: Remove excess files
+        run: rm -f _site/feed.xml &; rm -rf _site/assets/**/*.map
 
         # Convert jekyll redirects into CF redirects
       - name: Redirect Update
