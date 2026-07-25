@@ -1,0 +1,245 @@
+name: Auto Wrangler Updates
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: wrangler
+  cancel-in-progress: false
+  queue: single
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  clean_actions:
+    uses: ./.github/workflows/clean_actions.yml
+
+  get-repos:
+    name: Get All Repos
+    runs-on: ubuntu-latest
+    environment: wrangler-update
+    outputs:
+      repos: ${{ steps.get-repos.outputs.repos }}
+    steps:
+      - name: Query Repositories
+        id: get-repos
+        # I'd love to pin this to an SHA but it hasn't had a safe release in three years :(
+        uses: raven-actions/get-repos@main
+        with:
+          owner: ${{ github.repository_owner }}
+          github-token: ${{ secrets.READ_REPO_TOKEN }}
+          topics: "wrangler,cloudflare"
+          operator: "OR"
+
+  sync-repos:
+    name: Update Wrangler (${{ matrix.repo.name }})
+    if: ${{ needs.get-repos.outputs.repos != '[]' }} # make sure repos exist
+    runs-on: ubuntu-latest
+    environment: wrangler-update
+    needs: get-repos
+    # Actual Config Settings
+    env:
+      WORKERS_TYPES: "@cloudflare/workers-types"
+      FORCE_NODE_VERSION: "false"
+      GLOBAL_NODE_VERSION: "24.17"
+      COMMIT_MESSAGE: "Update Wrangler"
+      # If we should commit the changes immediately or open a pull request
+      AUTO_COMMIT: "true"
+      # If opening a pull request, who is the assignee of the PR?
+      PR_ASSIGN_TO: ${{ github.actor }}
+      # If commits should be signed. If so, the commits will show up as whatever's in your GPG key
+      # Otherwise, it will be github-actions[bot]
+      SIGN_COMMITS: "true"
+      # These are unused if SIGN_COMMITS == 'true'
+      DEFAULT_USERNAME: ${{ github.actor }}
+      DEFAULT_EMAIL: ""
+    strategy:
+      matrix:
+        repo: ${{ fromJson(needs.get-repos.outputs.repos) }}
+      fail-fast: false
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.READ_REPO_TOKEN }}
+          repository: ${{ matrix.repo.full_name }}
+
+      - name: Find Node Directory
+        id: node_directory
+        # Welcome to the hack zone, I hate it here
+        #
+        # This is based on the necessity of wrangler.toml's presence
+        # Probably not the best option, but w/e
+        run: |
+          dir=$(dirname $(realpath $(find . -name 'wrangler.toml')))
+          dir=${dir/$WORKSPACE}
+          dir=${dir#/}
+          echo "dir=${dir}" >> "$GITHUB_OUTPUT"
+          sep=""
+          if [[ "$dir" != "" ]]; then
+            sep="/"
+          fi
+          echo "ver=${dir}${sep}.node-version" >> "$GITHUB_OUTPUT"
+          echo "ver_lock=${dir}${sep}.node-lock" >> "$GITHUB_OUTPUT"
+          echo "lock=${dir}${sep}package-lock.json" >> "$GITHUB_OUTPUT"
+          echo "pack=${dir}${sep}package.json" >> "$GITHUB_OUTPUT"
+        env:
+          WORKSPACE: ${{ github.workspace }}
+
+        # Check to see if the package has a "types" run script
+        # or if it needs workers-types
+      - name: Read packages.json
+        id: package_read
+        uses: socksthewolf/github-action-json@v1.0.3
+        with:
+          path: ${{ steps.node_directory.outputs.pack }}
+
+      - name: Check packages.json
+        id: type_check
+        if: ${{ success() && (steps.package_read.outputs.scripts || steps.package_read.outputs.devDependencies )}}
+        run: |
+          # Check for npm run types
+          check_script_types=$(echo "$SCRIPT_DATA" | jq -r .types)
+          if [[ "$check_script_types" != null ]]; then
+            echo "has_types_command=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_types_command=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Check for CF workers type usage
+          check_dev_depends=$(echo "$DEV_DEPENDS" | jq -r ."$WORKERS_TYPES")
+          if [[ "$check_dev_depends" != null ]]; then
+            echo "has_cf_types=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_cf_types=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          SCRIPT_DATA: ${{ steps.package_read.outputs.scripts }}
+          DEV_DEPENDS: ${{ steps.package_read.outputs.devDependencies }}
+
+      - name: Check ${{ case(env.FORCE_NODE_VERSION == 'true', '& Update ', '') }}Node Version
+        id: node_version
+        run: |
+          # Read Contents of .node-version
+          current_version=$(cat "$VERSION_FILE")
+
+          # TODO: Probably consolidate these conditionals
+          #
+          # Check to see if we have a .node-lock file
+          # if we do, do not update the version below.
+          if [ -e "$VERSION_LOCK" ]; then
+            echo "Version lock file exists, locking to $current_version"
+            echo "node_version=$current_version" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "$current_version" != "$NODE_VERSION" ]] && [[ "$FORCE_NODE_VERSION" == "true" ]]; then
+            echo "Current version is v$current_version, updating to v$NODE_VERSION"
+            echo "$NODE_VERSION" > "$VERSION_FILE"
+            echo "node_version=$NODE_VERSION" >> "$GITHUB_OUTPUT"
+          else
+            echo "Node version is up to date"
+            echo "node_version=$current_version" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          VERSION_FILE: ${{ steps.node_directory.outputs.ver }}
+          VERSION_LOCK: ${{ steps.node_directory.outputs.ver_lock }}
+          NODE_VERSION: ${{ env.GLOBAL_NODE_VERSION }}
+
+      - name: Install Node v${{ steps.node_version.outputs.node_version }}
+        id: node
+        uses: actions/setup-node@v7
+        with:
+          cache: "npm"
+          cache-dependency-path: ${{ steps.node_directory.outputs.lock }}
+          node-version-file: ${{ steps.node_directory.outputs.ver }}
+          package-manager-cache: true
+
+      - name: Install Wrangler ${{ case(steps.type_check.outputs.has_types_command == 'true', '& Build Types', '') }}
+        run: |
+          # Move to the correct working directory
+          if [ -n "$NODE_DIR" ]; then
+            echo "moved directory to $NODE_DIR"
+            cd $NODE_DIR
+          fi
+
+          # Run all node commands
+
+          # Install Wrangler
+          echo "Installing wrangler latest..."
+          npm install wrangler@latest --save-dev
+
+          # Install Workers Types if needed
+          if [[ "$NEEDS_CF_TYPES" == "true "]]; then
+            echo "Install latest CF types..."
+            npm install $WORKERS_TYPES@latest --save-dev
+          fi
+
+          # Install all other packages and run types if necessary
+          if [[ "$NEEDS_TYPES" == "true" ]]; then
+            echo "Building types..."
+            npm install && npm run types
+          fi
+        env:
+          NODE_DIR: ${{ steps.node_directory.outputs.dir }}
+          NEEDS_TYPES: ${{ steps.type_check.outputs.has_types_command == 'true' }}
+          NEEDS_CF_TYPES: ${{ steps.type_check.outputs.has_cf_types == 'true' }}
+
+        # Set up the GPG Key for Signing Commits
+      - name: "Signing: Setup GPG Key"
+        id: import-gpg
+        if: ${{ env.SIGN_COMMITS == 'true' }}
+        uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+
+        # This is a bit silly, but it's the best way to combine the output of the GPG step
+        # or creating our own data based on run environment
+      - name: Prepare Deploy Output
+        id: precommit
+        run: |
+          echo "author=\"$IN_AUTHOR\"" >> "$GITHUB_OUTPUT"
+          echo "email=\"$IN_EMAIL\"" >> "$GITHUB_OUTPUT"
+          echo "name=\"$IN_NAME\"" >> "$GITHUB_OUTPUT"
+        env:
+          IN_AUTHOR: |-
+            ${{ case(env.SIGN_COMMITS == 'true',
+              format('"${0} <${1}>"', steps.import-gpg.outputs.name, steps.import-gpg.outputs.email),
+              format('"${0} <${1}>"', env.DEFAULT_USERNAME, env.DEFAULT_EMAIL)
+            ) }}
+          IN_NAME: ${{ case(env.SIGN_COMMITS == 'true', steps.import-gpg.outputs.name, env.DEFAULT_USERNAME) }}
+          IN_EMAIL: ${{ case(env.SIGN_COMMITS == 'true', steps.import-gpg.outputs.email, env.DEFAULT_EMAIL) }}
+
+      - name: Commit Files
+        if: ${{ success() && env.AUTO_COMMIT == 'true' }}
+        uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d
+        with:
+          commit_message: ${{ env.COMMIT_MESSAGE }}
+          commit_author: ${{ steps.precommit.outputs.author }}
+          commit_user_name: ${{ steps.precommit.outputs.name }}
+          commit_user_email: ${{ steps.precommit.outputs.email }}
+          # All Commits are Signed
+          commit_options: ${{ case(env.SIGN_COMMITS == 'true', '-S', '')}}
+
+      - name: Create Pull Request
+        if: ${{ success() && env.AUTO_COMMIT == 'false' }}
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
+        with:
+          token: ${{ case(env.SIGN_COMMITS == 'true', secrets.CREATE_PR_TOKEN, secrets.GITHUB_TOKEN) }}
+          delete-branch: true
+          commit-message: ${{ env.COMMIT_MESSAGE }}
+          sign-commits: ${{ case(env.SIGN_COMMITS == 'true', false, true) }}
+          title: "Chore: Wrangler Update"
+          assignees: ${{ env.PR_ASSIGN_TO }}
+          committer: ${{ steps.precommit.outputs.author }}
+          body: "All Wrangler + Safe Packages have been updated"
+          branch: "chore/wrangler-update"
