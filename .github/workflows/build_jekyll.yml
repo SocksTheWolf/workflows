@@ -147,7 +147,7 @@ jobs:
 
         # Remove excess files
       - name: Remove excess files
-        run: rm -f _site/feed.xml &; rm -rf _site/assets/**/*.map
+        run: rm -f _site/feed.xml && rm -rf _site/assets/**/*.map
 
         # Convert jekyll redirects into CF redirects
       - name: Redirect Update
