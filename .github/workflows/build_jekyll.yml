@@ -90,7 +90,8 @@ jobs:
     name: Jekyll Build
     environment: jekyll
     outputs:
-      clear_cache: ${{ steps.filter.outputs.clear_cache == true }}
+      # path filters is a string output, but booleans are different here
+      clear_cache: ${{ steps.filter.outputs.clear_cache == 'true' }}
       built: ${{ steps.build.conclusion == 'success' }}
       deployed: ${{ steps.wrangler-deploy.conclusion == 'success' }}
     steps:
