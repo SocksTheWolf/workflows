@@ -26,7 +26,7 @@ on:
 
   # Changes to the cron schedule are only picked up after a day
   schedule:
-    - cron: '12,21,33,42,58 * * * *'
+    - cron: '12 */2 * * *'
 
 permissions:
   actions: write
