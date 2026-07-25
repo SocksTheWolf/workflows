@@ -1,0 +1,7 @@
+{
+  "type": "module",
+  "devDependencies": {
+    "wrangler": "^4.114.0",
+    "@cloudflare/workers-types": "^5.20260724.1"
+  }
+}

@@ -14,12 +14,13 @@ There are two auto scripts.
 
 - `auto_sync.yml` - Will keep all other forked repos in sync with the base repository
 - `auto_update_wrangler.yml` - Will query all other repos within the org/user and update wrangler/node for them if necessary.
+  - This repo is rigged for when dependabot updates a dummy node instance, it will update all other other repos.
 
 ### Secrets
 
 **tl:dr**: If you want to use the secrets without passing them explicitly in an org, you _must_ fork the repo.
 
-Otherwise, secrets will not transfer automatically even when the environment exists already in the repo.
+Otherwise, secrets will not transfer automatically even when the environment already exists in the repo.
 
 If you do not want to fork, you must manually pass the secrets.
 

@@ -9,9 +9,11 @@ name: Auto Update Wrangler
 on:
   push:
     branches: "main"
-    # Run whenever this script updates
+    # Run whenever the wrangler-updates package updates
+    # This is so we can piggyback off dependabot PRs
     paths:
-      - ".github/workflows/auto_update_wrangler.yml"
+      - "wrangler-updates/package.json"
+      - "wrangler-updates/.node-version"
 
   workflow_dispatch: {}
 
@@ -34,15 +36,27 @@ jobs:
     uses: ./.github/workflows/clean_actions.yml
 
   get-repos:
-    name: Query Wrangler Repos
+    name: Prepare Wrangler Update
     runs-on: ubuntu-latest
     environment: wrangler-update
     permissions:
       contents: read
     outputs:
       repos: ${{ steps.get-repos.outputs.repos }}
+      node_version: ${{ steps.read.outputs.value }}
     steps:
-      - name: Query Repositories
+      - name: Checkout Current Repo
+        uses: actions/checkout@v7
+
+      - name: Read Global Node Version
+        id: read
+        run: |
+          echo "Reading global node version"
+          node_version=$(cat "wrangler-updates/.node-version")
+          echo "The current global node version is v$node_version"
+          echo "value=$node_version" >> "$GITHUB_OUTPUT"
+
+      - name: Query Repos
         id: get-repos
         # I'd love to pin this to an SHA but it hasn't had a safe release in three years :(
         uses: raven-actions/get-repos@main
@@ -65,14 +79,16 @@ jobs:
     env:
       # The name of the cloudflare workers types package
       WORKERS_TYPES: "@cloudflare/workers-types"
+      # The global node version
+      GLOBAL_NODE_VERSION: ${{ needs.get-repos.outputs.node_version }}
 
       # If we should force all repositories to use a specific version of node
       #
-      # NOTE: this will also write .node-version to whatever the version of GLOBAL_NODE_VERSION is.
+      # NOTE: this will also write .node-version to whatever
+      # the version of GLOBAL_NODE_VERSION is (pulled from this repo's .node-version is)
+      #
       # This can be turned off per repo by adding a file named .node-lock
       FORCE_NODE_VERSION: "false"
-      # The global node version
-      GLOBAL_NODE_VERSION: "24.17"
 
       # If we should commit the changes immediately or open a pull request
       AUTO_COMMIT: "true"
