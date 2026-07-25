@@ -19,6 +19,8 @@ concurrency:
 
 permissions:
   actions: write
+  contents: write
+  pull-requests: write
 
 jobs:
   clean_actions:
@@ -48,10 +50,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: wrangler-update
     needs: get-repos
-    # Only really needed if we are not signing
-    permissions:
-      contents: write
-      pull-requests: write
     # Actual Config Settings
     env:
       WORKERS_TYPES: "@cloudflare/workers-types"
@@ -76,7 +74,6 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v7
         with:
-          persist-credentials: true
           repository: ${{ matrix.repo.full_name }}
 
       - name: Find Node Directory
