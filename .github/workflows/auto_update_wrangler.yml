@@ -7,6 +7,7 @@ on:
 
   workflow_dispatch:
 
+# Probably could consolidate the bash scripts, but w/e
 defaults:
   run:
     shell: bash
@@ -18,8 +19,6 @@ concurrency:
 
 permissions:
   actions: write
-  contents: write
-  pull-requests: write
 
 jobs:
   clean_actions:
@@ -43,11 +42,16 @@ jobs:
           operator: "OR"
 
   sync-repos:
-    name: Update Wrangler (${{ matrix.repo.name }})
-    if: ${{ needs.get-repos.outputs.repos != '[]' }} # make sure repos exist
+    name: Update Wrangler For (${{ matrix.repo.name }})
+    # make sure repos exist
+    if: ${{ needs.get-repos.outputs.repos != '[]' }}
     runs-on: ubuntu-latest
     environment: wrangler-update
     needs: get-repos
+    # Only really needed if we are not signing
+    permissions:
+      contents: write
+      pull-requests: write
     # Actual Config Settings
     env:
       WORKERS_TYPES: "@cloudflare/workers-types"
@@ -58,7 +62,7 @@ jobs:
       AUTO_COMMIT: "true"
       # If opening a pull request, who is the assignee of the PR?
       PR_ASSIGN_TO: ${{ github.actor }}
-      # If commits should be signed. If so, the commits will show up as whatever's in your GPG key
+      # If commits should be signed. If true, the commits will show up as whatever's in your GPG key
       # Otherwise, it will be github-actions[bot]
       SIGN_COMMITS: "true"
       # These are unused if SIGN_COMMITS == 'true'
@@ -106,7 +110,7 @@ jobs:
           path: ${{ steps.node_directory.outputs.pack }}
 
       - name: Check packages.json
-        id: type_check
+        id: pkg_check
         if: ${{ success() && (steps.package_read.outputs.scripts || steps.package_read.outputs.devDependencies )}}
         run: |
           echo "Check for other tasks to do..."
@@ -141,8 +145,6 @@ jobs:
           current_version=$(cat "$VERSION_FILE")
           echo "Currently using $current_version"
 
-          # TODO: Probably consolidate these conditionals
-          #
           # Check to see if we have a .node-lock file
           # if we do, do not update the version below.
           if [[ -e "$VERSION_LOCK" ]]; then
@@ -173,7 +175,7 @@ jobs:
           node-version-file: ${{ steps.node_directory.outputs.ver }}
           package-manager-cache: true
 
-      - name: Install Wrangler ${{ case(steps.type_check.outputs.has_types_command == 'true', '& Build Types', '') }}
+      - name: Install Wrangler ${{ case(steps.pkg_check.outputs.has_types_command == 'true', '& Build Types', '') }}
         run: |
           echo "Running updates..."
           # Move to the correct working directory
@@ -201,11 +203,11 @@ jobs:
           fi
         env:
           NODE_DIR: ${{ steps.node_directory.outputs.dir }}
-          NEEDS_TYPES: ${{ steps.type_check.outputs.has_types_command == 'true' }}
-          NEEDS_CF_TYPES: ${{ steps.type_check.outputs.has_cf_types == 'true' }}
+          NEEDS_TYPES: ${{ steps.pkg_check.outputs.has_types_command == 'true' }}
+          NEEDS_CF_TYPES: ${{ steps.pkg_check.outputs.has_cf_types == 'true' }}
 
         # Set up the GPG Key for Signing Commits
-      - name: "Signing: Setup GPG Key"
+      - name: ${{ case(env.SIGN_COMMITS == 'true', 'Doing:', 'Skipping:') }} "Setup GPG Key"
         id: import-gpg
         if: ${{ env.SIGN_COMMITS == 'true' }}
         uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd
@@ -221,7 +223,9 @@ jobs:
         id: precommit
         run: |
           echo "Preparing for deployment..."
-          echo "author=\"$IN_AUTHOR\"" >> "$GITHUB_OUTPUT"
+          # Author is formatted via the input, so it should not be wrapped into a string (as it already is)
+          echo "author=$IN_AUTHOR" >> "$GITHUB_OUTPUT"
+          # Everything else does need to be wrapped in a string
           echo "email=\"$IN_EMAIL\"" >> "$GITHUB_OUTPUT"
           echo "name=\"$IN_NAME\"" >> "$GITHUB_OUTPUT"
         env:
@@ -233,7 +237,7 @@ jobs:
           IN_NAME: ${{ case(env.SIGN_COMMITS == 'true', steps.import-gpg.outputs.name, env.DEFAULT_USERNAME) }}
           IN_EMAIL: ${{ case(env.SIGN_COMMITS == 'true', steps.import-gpg.outputs.email, env.DEFAULT_EMAIL) }}
 
-      - name: Commit Files
+      - name: ${{ case(env.AUTO_COMMIT == 'true', 'Doing:', 'Skipping:') }} Commit Files
         if: ${{ success() && env.AUTO_COMMIT == 'true' }}
         uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d
         with:
@@ -244,7 +248,7 @@ jobs:
           # All Commits are Signed
           commit_options: ${{ case(env.SIGN_COMMITS == 'true', '-S', '')}}
 
-      - name: Create Pull Request
+      - name: ${{ case(env.AUTO_COMMIT == 'false', 'Doing:', 'Skipping:') }} Create Pull Request
         if: ${{ success() && env.AUTO_COMMIT == 'false' }}
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
         with:
