@@ -35,13 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: cloudflare
     steps:
-      - name: Clearing Entire Zone
-        if: ${{ inputs.paths == '' }}
-        run: echo true
-      - name: Clearing Individual Paths
-        if: ${{ inputs.paths != '' }}
-        run: echo true
-      - name: Clear
+      - name: Clearing ${{ case(inputs.paths == '', 'Entire Zone', 'Individual Paths') }}
         uses: Cyb3r-Jak3/action-cloudflare-cache@6ebf798ade84e7ab7da249404e0c3b9aecf54f88
         with:
           zone: ${{ vars.CLOUDFLARE_ZONE }}
