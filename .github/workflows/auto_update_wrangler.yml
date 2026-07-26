@@ -59,8 +59,7 @@ jobs:
 
       - name: Query Repos
         id: get-repos
-        # I'd love to pin this to an SHA but it hasn't had a safe release in three years :(
-        uses: raven-actions/get-repos@main
+        uses: raven-actions/get-repos@c6353ce68aeca50cdbef29c5e76a627cd5503c4a
         with:
           owner: ${{ github.repository_owner }}
           # You should pass a token that is NOT the WRITE_PR secret
@@ -151,7 +150,7 @@ jobs:
         # or if it needs workers-types
       - name: Read packages.json
         id: package_read
-        uses: socksthewolf/github-action-json@v1.0.3
+        uses: socksthewolf/github-action-json@2496d3db8d63643161ca74efa6e835d6cd09d86c
         with:
           path: ${{ steps.node_directory.outputs.pack }}
 
