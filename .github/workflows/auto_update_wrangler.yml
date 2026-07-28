@@ -59,7 +59,7 @@ jobs:
 
       - name: Query Repos
         id: get-repos
-        uses: raven-actions/get-repos@c6353ce68aeca50cdbef29c5e76a627cd5503c4a
+        uses: raven-actions/get-repos@2af64f4ab99a8c73e5ad2a5b3ed1873a745a3a6b
         with:
           owner: ${{ github.repository_owner }}
           # You should pass a token that is NOT the WRITE_PR secret
