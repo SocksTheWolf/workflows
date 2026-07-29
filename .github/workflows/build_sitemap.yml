@@ -26,7 +26,6 @@ on:
       live_url:
         description: "Where the sitemap can be found online"
         type: string
-        required: true
       clean_deploys:
         description: "If deployments should be cleaned up before building"
         type: boolean
@@ -118,7 +117,7 @@ jobs:
   clear_sitemap_cache:
     name: Clear Sitemap Cache
     needs: update
-    if: ${{ needs.update.outputs.had_changes == 'true' || inputs.force_clear_cache == true }}
+    if: ${{ (needs.update.outputs.had_changes == 'true' || inputs.force_clear_cache == true) && inputs.live_url != '' }}
     uses: ./.github/workflows/clear_cache.yml
     with:
       paths: |
