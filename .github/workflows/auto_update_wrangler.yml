@@ -88,7 +88,7 @@ jobs:
       # the version of GLOBAL_NODE_VERSION is (pulled from this repo's .node-version is)
       #
       # This can be turned off per repo by adding a file named .node-lock
-      FORCE_NODE_VERSION: "false"
+      FORCE_NODE_VERSION: "true"
 
       # If we should commit the changes immediately or open a pull request
       AUTO_COMMIT: "true"
