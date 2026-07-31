@@ -23,15 +23,8 @@ on:
         type: string
         description: "The relative directory path to the sitemap from the root of the repo"
         required: true
-      live_url:
-        description: "Where the sitemap can be found online"
-        type: string
       clean_deploys:
         description: "If deployments should be cleaned up before building"
-        type: boolean
-        default: false
-      force_clear_cache:
-        description: "If the cache for the sitemap should be cleared regardless of if any changes were made"
         type: boolean
         default: false
 
@@ -113,12 +106,3 @@ jobs:
           commit_user_email: ${{ steps.import-gpg.outputs.email }}
           # All Commits are Signed
           commit_options: '-S'
-
-  clear_sitemap_cache:
-    name: Clear Sitemap Cache
-    needs: update
-    if: ${{ (needs.update.outputs.had_changes == 'true' || inputs.force_clear_cache == true) && inputs.live_url != '' }}
-    uses: ./.github/workflows/clear_cache.yml
-    with:
-      paths: |
-        ${{ inputs.live_url }}
