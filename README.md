@@ -60,7 +60,7 @@ Once done, it may take a day before scheduled actions run.
 | `build_sitemap.yml` | `sitemap` | false | max |
 | `clean_actions.yml` | `clean_actions` | true | N/A |
 | `clean_deploys.yml` | `clean_deploys` | false | max |
-| `clear_cache.yml` | `cloudflare_cache` | true | N/A |
+| `clear_cache.yml` | `cloudflare_cache` | false | max |
 | `auto_sync.yml` | `autosync` | true | N/A |
 | `auto_update_wrangler.yml` | `wrangler` | false | single |
 

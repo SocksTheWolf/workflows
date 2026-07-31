@@ -27,7 +27,8 @@ defaults:
 
 concurrency:
   group: "cloudflare_cache"
-  cancel-in-progress: true
+  cancel-in-progress: false
+  queue: max
 
 jobs:
   clear_cache:
