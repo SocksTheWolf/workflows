@@ -1,0 +1,7 @@
+{
+  "overrides": {
+    "wrangler": {
+      "undici": "latest"
+    }
+  }
+}

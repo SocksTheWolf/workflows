@@ -45,17 +45,23 @@ jobs:
     outputs:
       repos: ${{ steps.get-repos.outputs.repos }}
       node_version: ${{ steps.read.outputs.value }}
+      add_overrides: ${{ steps.read.outputs.add_overrides }}
+      remove_overrides: ${{ steps.read.outputs.remove_overrides }}
     steps:
       - name: Checkout Current Repo
         uses: actions/checkout@v7
 
-      - name: Read Global Node Version
+      - name: Read Variables
         id: read
         run: |
           echo "Reading global node version"
           node_version=$(cat "wrangler-updates/.node-version")
+          overrides_to_add=$(cat "wrangler-updates/package-overrides.json")
+          overrides_to_remove=$(cat "wrangler-updates/package-removals.txt")
           echo "The current global node version is v$node_version"
           echo "value=$node_version" >> "$GITHUB_OUTPUT"
+          echo "add_overrides=$overrides_to_add" >> "$GITHUB_OUTPUT"
+          echo "remove_overrides=$overrides_to_remove" >> "$GITHUB_OUTPUT"
 
       - name: Query Repos
         id: get-repos
@@ -105,6 +111,10 @@ jobs:
       # These are unused if SIGN_COMMITS == 'true'
       DEFAULT_USERNAME: ${{ github.actor }}
       DEFAULT_EMAIL: ""
+
+      # Allow for overriding repo keys and stuff
+      ADD_OVERRIDES: ${{ needs.get-repos.outputs.add_overrides }}
+      REMOVE_OVERRIDES: ${{ needs.get-repos.outputs.remove_overrides }}
 
     # If signing is off or the only repos being used are public
     # then these permissions are used
@@ -181,6 +191,18 @@ jobs:
         env:
           SCRIPT_DATA: ${{ steps.package_read.outputs.scripts }}
           DEV_DEPENDS: ${{ steps.package_read.outputs.devDependencies }}
+
+      - name: |-
+          ${{ format('Maintenance: {0}{1}Overrides',
+            case(env.ADD_OVERRIDES != '', 'Add ', ' '),
+            case(env.REMOVE_OVERRIDES != '', ' Remove ', ' ')) }}
+        if: ${{ success() && (env.ADD_OVERRIDES != '' || env.REMOVE_OVERRIDES != '')}}
+        uses: socksthewolf/github-action-json@improve
+        with:
+          path: ${{ steps.node_directory.outputs.pack }}
+          replaceWith: ${{ env.ADD_OVERRIDES }}
+          removeKeys: ${{ env.REMOVE_OVERRIDES }}
+          dryRun: true
 
       - name: |-
           ${{ format('Node: Check{0}Version', case(env.FORCE_NODE_VERSION == 'true', ' & Update Any ', ' ')) }}
