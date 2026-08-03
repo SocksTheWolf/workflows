@@ -11,10 +11,12 @@ on:
   push:
     branches: "main"
     # Run whenever the wrangler-updates package updates
-    # This is so we can piggyback off dependabot PRs
+    # This is so we can piggyback off dependabot PRs being merged
     paths:
-      - "wrangler-updates/package.json"
-      - "wrangler-updates/.node-version"
+      - ".github/workflows/auto_update_wrangler.yml"
+      - "wrangler-updates/**"
+      - "!wranger-updates/README.md"
+      - "!wrangler-updates/wrangler.toml"
 
   workflow_dispatch: {}
 
@@ -56,7 +58,7 @@ jobs:
         run: |
           echo "Reading global node version"
           node_version=$(cat "wrangler-updates/.node-version")
-          overrides_to_add=$(cat "wrangler-updates/package-overrides.json")
+          overrides_to_add=$(cat "wrangler-updates/package-overrides.json" | jq -c)
           overrides_to_remove=$(cat "wrangler-updates/package-removals.txt")
           echo "The current global node version is v$node_version"
           echo "value=$node_version" >> "$GITHUB_OUTPUT"
