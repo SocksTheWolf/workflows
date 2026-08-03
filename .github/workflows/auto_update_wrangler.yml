@@ -162,7 +162,7 @@ jobs:
         # or if it needs workers-types
       - name: Read packages.json
         id: package_read
-        uses: socksthewolf/github-action-json@2496d3db8d63643161ca74efa6e835d6cd09d86c
+        uses: socksthewolf/github-action-json@f5b8639eabc0eb63279e4efe8206e8fd5d6bd811
         with:
           path: ${{ steps.node_directory.outputs.pack }}
 
@@ -199,12 +199,11 @@ jobs:
             case(env.ADD_OVERRIDES != '', 'Add ', ' '),
             case(env.REMOVE_OVERRIDES != '', ' Remove ', ' ')) }}
         if: ${{ success() && (env.ADD_OVERRIDES != '' || env.REMOVE_OVERRIDES != '')}}
-        uses: socksthewolf/github-action-json@improve
+        uses: socksthewolf/github-action-json@f5b8639eabc0eb63279e4efe8206e8fd5d6bd811
         with:
           path: ${{ steps.node_directory.outputs.pack }}
           replaceWith: ${{ env.ADD_OVERRIDES }}
           removeKeys: ${{ env.REMOVE_OVERRIDES }}
-          dryRun: true
 
       - name: |-
           ${{ format('Node: Check{0}Version', case(env.FORCE_NODE_VERSION == 'true', ' & Update Any ', ' ')) }}
