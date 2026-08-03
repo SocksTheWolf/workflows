@@ -82,7 +82,7 @@ jobs:
 
         # Install packages
       - name: Install and Build Sitemap
-        run: npm install && npm run sitemap
+        run: npm install --ignore-scripts --allow-git=none && npm run sitemap
 
         # Set up the GPG Key for Signing Commits
       - name: Setup GPG Key

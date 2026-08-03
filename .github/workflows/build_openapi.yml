@@ -99,7 +99,7 @@ jobs:
 
       - name: Install and Build Spec
         if: ${{ inputs.needs_node == true && steps.node.conclusion == 'success' }}
-        run: npm install && npm run openapi
+        run: npm install --ignore-scripts --allow-git=none && npm run openapi
 
         # Download Existing OpenAPI spec if provided
       - name: If Download but Missing Download URI

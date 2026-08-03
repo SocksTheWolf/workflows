@@ -270,7 +270,7 @@ jobs:
           # Install all other packages and run types if necessary
           if [[ "$NEEDS_TYPES" == "true" ]]; then
             echo "Building types..."
-            npm install && npm run types
+            npm install --ignore-scripts --allow-git=none && npm run types
           fi
         env:
           NODE_DIR: ${{ steps.node_directory.outputs.dir }}
