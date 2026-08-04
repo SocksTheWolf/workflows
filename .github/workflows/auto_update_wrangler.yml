@@ -205,16 +205,29 @@ jobs:
             echo "Does not have Hono"
             echo "has_hono=false" >> "$GITHUB_OUTPUT"
           fi
+
+          # Check to see if we should skip the package auto overrides
+          check_auto_overrides=$(echo "$CUSTOM_DATA" | jq -r ."\"no_auto_override\"")
+          if [[ -n "$check_auto_overrides" ]] && [[ "$check_auto_overrides" != null ]]; then
+            echo "Skipping Auto Overrides"
+            echo "skip_overrides=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Running Auto Overrides"
+            echo "skip_overrides=false" >> "$GITHUB_OUTPUT"
+          fi
         env:
           SCRIPT_DATA: ${{ steps.package_read.outputs.scripts }}
           DEV_DEPENDS: ${{ steps.package_read.outputs.devDependencies }}
           DEPENDS: ${{ steps.package_read.outputs.dependencies }}
+          CUSTOM_DATA: ${{ steps.package_read.outputs.custom }}
 
       - name: |-
-          ${{ format('Maintenance: {0}{1}Overrides',
-            case(env.ADD_OVERRIDES != '', 'Add ', ' '),
-            case(env.REMOVE_OVERRIDES != '', ' Remove ', ' ')) }}
-        if: ${{ success() && (env.ADD_OVERRIDES != '' || env.REMOVE_OVERRIDES != '')}}
+          ${{ format('Maintenance: {0}Auto Overrides',
+            case(steps.pkg_check.outputs.skip_overrides == 'true',
+            'Skip ',
+            format('{0}{1}', case(env.ADD_OVERRIDES != '', 'Add ', ' '),
+            case(env.REMOVE_OVERRIDES != '', ' Remove ', ' ')))) }}
+        if: ${{ success() && steps.pkg_check.outputs.skip_overrides != 'true' && (env.ADD_OVERRIDES != '' || env.REMOVE_OVERRIDES != '') }}
         uses: socksthewolf/github-action-json@f5b8639eabc0eb63279e4efe8206e8fd5d6bd811
         with:
           path: ${{ steps.node_directory.outputs.pack }}
@@ -229,7 +242,7 @@ jobs:
           # Add .node-version if it's missing for whatever reason
           # (like I forgot or something)
           #
-          # NOTE: This will bypass any .node-lock files
+          # NOTE: This will bypass any .node-lock files if a .node-version doesn't already exist.
           if [[ ! -f "$VERSION_FILE" ]]; then
             echo "Repo does not have a .node-version file, adding it to version $NODE_VERSION!"
             echo "$NODE_VERSION" > "$VERSION_FILE"
