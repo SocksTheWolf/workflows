@@ -20,3 +20,4 @@ updates:
       interval: "daily"
     cooldown:
       default-days: 2
+    versioning-strategy: increase
