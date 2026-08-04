@@ -172,7 +172,7 @@ jobs:
         id: node_directory
         # Welcome to the hack zone, I hate it here
         run: |
-          dir=$(dirname $(realpath $(find . -maxdepth 2 -name 'package.json')))
+          dir=$(dirname $(realpath $(find . -name 'wrangler.toml')))
           dir=${dir/$WORKSPACE}
           dir=${dir#/}
           echo "dir=${dir}" >> "$GITHUB_OUTPUT"
