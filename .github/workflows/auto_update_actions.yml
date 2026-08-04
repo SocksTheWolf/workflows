@@ -31,7 +31,7 @@ concurrency:
 
 jobs:
   get-repos:
-    name: Prepare Runtime Update
+    name: Prepare Action Builds Update
     runs-on: ubuntu-latest
     environment: wrangler-update
     permissions:
@@ -96,7 +96,9 @@ jobs:
           package-manager-cache: true
 
       - name: Bump Versions
-        run: npm version patch
+        run: |-
+          echo "Bumping current build version"
+          npm version patch --no-git-tag-version
 
         # In the future, use this to bump the version numbers
       - name: Read packages.json
