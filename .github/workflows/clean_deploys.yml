@@ -10,6 +10,13 @@ on:
         type: string
         required: true
 
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "The github environment name to clean up deploys for"
+        type: string
+        required: true
+
 permissions:
   deployments: write
 
