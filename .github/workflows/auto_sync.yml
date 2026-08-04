@@ -30,6 +30,7 @@ on:
 
 permissions:
   actions: write
+  deployments: write
 
 defaults:
   run:
@@ -42,6 +43,11 @@ concurrency:
 jobs:
   clean_actions:
     uses: ./.github/workflows/clean_actions.yml
+
+  clean_deploys:
+    uses: ./.github/workflows/clean_deploys.yml
+    with:
+      environment: wrangler-update
 
   sync:
     name: Sync Fork
