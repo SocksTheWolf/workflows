@@ -17,6 +17,7 @@ on:
       - "wrangler-updates/**"
       - "!wranger-updates/README.md"
       - "!wrangler-updates/wrangler.toml"
+      - "!wrangler-updates/package-lock.json"
 
   workflow_dispatch: {}
 
@@ -102,7 +103,7 @@ jobs:
       AUTO_COMMIT: "true"
 
       # The commit message. If a Pull Request is being opened, this is the title of the pull request.
-      COMMIT_MESSAGE: "Update Wrangler"
+      COMMIT_MESSAGE: "Wrangler and Runtime Updates"
       # If opening a pull request, who is the assignee of the PR?
       PR_ASSIGN_TO: ${{ github.actor }}
 
@@ -357,7 +358,7 @@ jobs:
           delete-branch: true
           commit-message: ${{ env.COMMIT_MESSAGE }}
           sign-commits: ${{ case(env.SIGN_COMMITS == 'true', false, true) }}
-          title: "Chore: Wrangler Update"
+          title: "Chore: Wrangler Dependencies Update"
           assignees: ${{ env.PR_ASSIGN_TO }}
           committer: ${{ steps.precommit.outputs.author }}
           body: "All Wrangler + Safe Packages have been updated"

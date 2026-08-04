@@ -1,7 +1,14 @@
 {
+  "name": "dummynode",
   "type": "module",
+  "private": true,
   "devDependencies": {
-    "wrangler": "^4.114.0",
-    "@cloudflare/workers-types": "^5.20260724.1"
+    "@cloudflare/workers-types": "^5.20260724.1",
+    "wrangler": "^4.118.0"
+  },
+  "overrides": {
+    "wrangler": {
+      "undici": "^7.29.0"
+    }
   }
 }
