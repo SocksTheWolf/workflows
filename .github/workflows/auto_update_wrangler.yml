@@ -1,7 +1,9 @@
-# Updates all repositories with either the wrangler or cloudflare tag that you own
+# Updates all repositories with either the wrangler, auto-deps or cloudflare tag that you own
 #
 # This will not work on any repositories that are technically forks, even if forked with the intent to not push back to mainline.
-# The only fix to this is to disconnect from the fork network
+# The only fix to this is to disconnect from the fork network.
+#
+# Despite the name, this can also manage any package overrides that you may want.
 #
 # It is recommended to have an environment named wrangler-update,
 # but you can also just set it in the repository secrets
@@ -98,7 +100,7 @@ jobs:
           owner: ${{ github.repository_owner }}
           # You should pass a token that is NOT the WRITE_PR secret
           github-token: ${{ secrets.READ_REPO_TOKEN }}
-          topics: "wrangler,cloudflare"
+          topics: "wrangler,cloudflare,auto-deps"
           operator: "OR"
 
   sync-repos:
@@ -169,11 +171,8 @@ jobs:
           ${{ format('Node: Find Directory') }}
         id: node_directory
         # Welcome to the hack zone, I hate it here
-        #
-        # This is based on the necessity of wrangler.toml's presence
-        # Probably not the best option, but w/e
         run: |
-          dir=$(dirname $(realpath $(find . -name 'wrangler.toml')))
+          dir=$(dirname $(realpath $(find . -name 'package.json')))
           dir=${dir/$WORKSPACE}
           dir=${dir#/}
           echo "dir=${dir}" >> "$GITHUB_OUTPUT"
@@ -208,6 +207,24 @@ jobs:
           else
             echo "Does not have npm run types"
             echo "has_types_command=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Check for Wrangler installs
+          echo "Checking for wrangler..."
+          check_wrangler_dev_depends=$(echo "$DEV_DEPENDS" | jq -r ."\"wrangler\"")
+          check_wrangler_depends=$(echo "$DEPENDS" | jq -r ."\"wrangler\"")
+          # Check in dev dependencies
+          if [[ -n "$check_wrangler_dev_depends" ]] && [[ "$check_wrangler_dev_depends" != null ]]; then
+            echo "Has Wrangler"
+            echo "has_wrangler=true" >> "$GITHUB_OUTPUT"
+          # Check regular dependencies
+          elif [[ -n "$check_wrangler_depends" ]] && [[ "$check_wrangler_depends" != null ]]; then
+            echo "Has Wrangler"
+            echo "has_wrangler=true" >> "$GITHUB_OUTPUT"
+          # Doesn't have wrangler then
+          else
+            echo "Does not have Wrangler"
+            echo "has_wrangler=false" >> "$GITHUB_OUTPUT"
           fi
 
           # Check for CF workers type usage
@@ -341,9 +358,14 @@ jobs:
 
           # Run all node commands
 
-          # Install Wrangler
-          echo "Installing wrangler latest..."
-          npm install wrangler@latest --save-dev
+          # Install Wrangler or Install Packages
+          if [[ "$NEEDS_WRANGLER" == "true" ]]; then
+            echo "Installing wrangler latest..."
+            npm install wrangler@latest --save-dev
+          elif [[ "$HAS_OVERRIDES" == "true" ]]; then
+            echo "Installing Packages"
+            npm install --ignore-scripts --allow-git=none --save-dev
+          fi
 
           # Install Workers Types if needed
           if [[ "$NEEDS_CF_TYPES" == "true" ]]; then
@@ -366,7 +388,10 @@ jobs:
           NODE_DIR: ${{ steps.node_directory.outputs.dir }}
           NEEDS_TYPES_RUN: ${{ steps.pkg_check.outputs.has_types_command == 'true' }}
           NEEDS_CF_TYPES: ${{ steps.pkg_check.outputs.has_cf_types == 'true' }}
+          NEEDS_WRANGLER: ${{ steps.pkg_check.outputs.has_wrangler == 'true' }}
           NEEDS_HONO: ${{ steps.pkg_check.outputs.has_hono == 'true' && env.UPDATE_HONO == 'true' }}
+          HAS_OVERRIDES: |-
+            ${{ steps.pkg_check.outputs.skip_overrides != 'true' && (env.ADD_OVERRIDES != '' || env.REMOVE_OVERRIDES != '') }}
 
         # Set up the GPG Key for Signing Commits
       - name: ${{ case(env.SIGN_COMMITS == 'true', 'Doing:', 'Skipping:') }} Setup GPG Key

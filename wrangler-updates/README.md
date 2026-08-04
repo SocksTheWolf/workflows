@@ -1,4 +1,4 @@
-# Wrangler Updates Trick
+# Wrangler & Runtime Updates Trick
 
 ## Setup
 
