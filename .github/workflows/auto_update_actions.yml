@@ -113,7 +113,7 @@ jobs:
         id: version
         run: |
           version=$(echo $NEW_VERSION | tr -d '"')
-          echo $version >> "$GITHUB_OUTPUT"
+          echo version=$version >> "$GITHUB_OUTPUT"
         env:
           NEW_VERSION: ${{ steps.package_read.outputs.version }}
 
