@@ -1,0 +1,7 @@
+{
+  "overrides": {
+    "wrangler": {
+      "undici": "^7.29.0"
+    }
+  }
+}
