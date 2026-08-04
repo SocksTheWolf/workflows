@@ -14,7 +14,7 @@ on:
     inputs:
       environment:
         description: "The github environment name to clean up deploys for"
-        type: string
+        type: environment
         required: true
 
 permissions:
