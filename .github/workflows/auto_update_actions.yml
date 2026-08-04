@@ -106,9 +106,13 @@ jobs:
         uses: socksthewolf/github-action-json@f5b8639eabc0eb63279e4efe8206e8fd5d6bd811
 
       - name: Update Builds
+        id: builds
         run: |
           echo "updating builds"
           npm install --ignore-scripts --allow-git=none && npm run bundle
+          version=$(echo $NEW_VERSION | tr -d '"') >> "$GITHUB_OUTPUT"
+        env:
+          NEW_VERSION: ${{ steps.package_read.outputs.version }}
 
         # Set up the GPG Key for Signing Commits
       - name: ${{ case(env.SIGN_COMMITS == 'true', 'Doing:', 'Skipping:') }} Setup GPG Key
@@ -125,7 +129,7 @@ jobs:
         id: commit
         uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d
         with:
-          tag_name: ${{ format('v{0}', steps.package_read.outputs.version )}}
+          tag_name: ${{ format('v{0}', steps.builds.outputs.version )}}
           commit_message: ${{ env.COMMIT_MESSAGE }}
           commit_author: |-
             ${{ case(env.SIGN_COMMITS == 'true',
@@ -150,7 +154,7 @@ jobs:
           repository: ${{ matrix.repo.full_name }}
           token: ${{ secrets.CREATE_PR_TOKEN || secrets.GITHUB_TOKEN }}
           overwrite_files: false
-          tag_name: ${{ format('v{0}', steps.package_read.outputs.version )}}
+          tag_name: ${{ format('v{0}', steps.builds.outputs.version )}}
           body: "Updated Actions Build"
           generate_release_notes: true
 
