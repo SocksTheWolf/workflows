@@ -74,6 +74,23 @@ jobs:
           echo "add_overrides=$overrides_to_add" >> "$GITHUB_OUTPUT"
           echo "remove_overrides=$overrides_to_remove" >> "$GITHUB_OUTPUT"
 
+        # Two steps for easier debugging
+      - name: |-
+          ${{ format('Debug: Package keys {0} added', case(steps.read.outputs.add_overrides != '', 'will be', 'will not be')) }}
+        run: |
+          echo "$FILE_CONTENTS"
+        if: ${{ steps.read.outputs.add_overrides != '' }}
+        env:
+          FILE_CONTENTS: ${{ steps.read.outputs.add_overrides }}
+
+      - name: |-
+          ${{ format('Debug: Package Keys {0} removed', case(steps.read.outputs.remove_overrides != '', 'will be', 'will not be')) }}
+        run: |
+          echo "$FILE_CONTENTS"
+        if: ${{ steps.read.outputs.remove_overrides != '' }}
+        env:
+          FILE_CONTENTS: ${{ steps.read.outputs.remove_overrides }}
+
       - name: Query Repos
         id: get-repos
         uses: raven-actions/get-repos@c6353ce68aeca50cdbef29c5e76a627cd5503c4a
@@ -85,7 +102,7 @@ jobs:
           operator: "OR"
 
   sync-repos:
-    name: Update Runtime For (${{ matrix.repo.name }})
+    name: Update Runtimes For (${{ matrix.repo.name }})
     runs-on: ubuntu-latest
     needs: get-repos
     # make sure repos exist
