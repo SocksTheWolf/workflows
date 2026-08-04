@@ -5,6 +5,12 @@
 #
 # It is recommended to have an environment named wrangler-update,
 # but you can also just set it in the repository secrets
+#
+# The following secrets should be created:
+#   * CREATE_PR_TOKEN - PAT that has coverage for creating pull requests, writing repos
+#   * READ_REPO_TOKEN - PAT that has coverage for reading your repos. You cannot use GITHUB_TOKEN, as it will not show private repos.
+#   * GPG_PASSPHRASE - For auto commits, that are signed.
+#   * GPG_PRIVATE_KEY - For auto commits, on signing.
 
 name: Auto Update Wrangler
 on:
@@ -13,7 +19,6 @@ on:
     # Run whenever the wrangler-updates package updates
     # This is so we can piggyback off dependabot PRs being merged
     paths:
-      - ".github/workflows/auto_update_wrangler.yml"
       - "wrangler-updates/**"
       # Ignore these files being changed though.
       - "!wranger-updates/README.md"
@@ -38,6 +43,7 @@ permissions:
 
 jobs:
   clean-actions:
+    name: Clean Actions
     uses: ./.github/workflows/clean_actions.yml
 
   get-repos:
@@ -60,6 +66,7 @@ jobs:
         run: |
           echo "Reading global node version"
           node_version=$(cat "wrangler-updates/.node-version")
+          # This will flatten the internals of this file to 1 line.
           overrides_to_add=$(cat "wrangler-updates/package-overrides.json" | jq -c)
           overrides_to_remove=$(cat "wrangler-updates/package-removals.txt")
           echo "The current global node version is v$node_version"
@@ -221,13 +228,20 @@ jobs:
           DEPENDS: ${{ steps.package_read.outputs.dependencies }}
           CUSTOM_DATA: ${{ steps.package_read.outputs.custom }}
 
+        # Look how "cool" this name formatting looks, it's fucking insane.
       - name: |-
-          ${{ format('Maintenance: {0}Auto Overrides',
+          ${{ format('Maintenance: {0}Auto Package Overrides',
             case(steps.pkg_check.outputs.skip_overrides == 'true',
             'Skip ',
-            format('{0}{1}', case(env.ADD_OVERRIDES != '', 'Add ', ' '),
-            case(env.REMOVE_OVERRIDES != '', ' Remove ', ' ')))) }}
-        if: ${{ success() && steps.pkg_check.outputs.skip_overrides != 'true' && (env.ADD_OVERRIDES != '' || env.REMOVE_OVERRIDES != '') }}
+            case(env.ADD_OVERRIDES != '' && env.REMOVE_OVERRIDES != '', 'Add & Remove ',
+              format('{0}{1}',
+                case(env.ADD_OVERRIDES != '', 'Add ', ''),
+                case(env.REMOVE_OVERRIDES != '', 'Remove ', ''))))) }}
+        # It also has an overencumbered if statement too~!
+        if: |
+          ${{ success() &&
+            steps.pkg_check.outputs.skip_overrides != 'true' &&
+              (env.ADD_OVERRIDES != '' || env.REMOVE_OVERRIDES != '') }}
         uses: socksthewolf/github-action-json@f5b8639eabc0eb63279e4efe8206e8fd5d6bd811
         with:
           path: ${{ steps.node_directory.outputs.pack }}
@@ -235,7 +249,8 @@ jobs:
           removeKeys: ${{ env.REMOVE_OVERRIDES }}
 
       - name: |-
-          ${{ format('Node: Check{0}Version', case(env.FORCE_NODE_VERSION == 'true', ' & Update Any ', ' ')) }}
+          ${{ format('Node: Check{0}Version',
+            case(env.FORCE_NODE_VERSION == 'true', ' & Update Any ', ' ')) }}
         id: node_version
         run: |
           echo "Checking Node Version..."
@@ -379,7 +394,8 @@ jobs:
 
       - name: |-
           ${{ case(env.AUTO_COMMIT == 'true',
-          format('Commit Result: {0}', case(steps.commit.outputs.changes_detected == 'true', 'Committed', 'No Changes')),
+          format('Commit Result: {0}',
+            case(steps.commit.outputs.changes_detected == 'true', 'Committed', 'No Changes')),
           'Skipped: Uses PRs') }}
         if: ${{ success() && steps.commit.outcome == 'success' }}
         run: echo "Commit Result!"
@@ -389,7 +405,10 @@ jobs:
         id: pull-request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
         with:
-          token: ${{ case(env.SIGN_COMMITS == 'true', secrets.CREATE_PR_TOKEN || secrets.GITHUB_TOKEN, secrets.GITHUB_TOKEN) }}
+          token: |-
+            ${{ case(env.SIGN_COMMITS == 'true',
+              secrets.CREATE_PR_TOKEN || secrets.GITHUB_TOKEN,
+              secrets.GITHUB_TOKEN) }}
           delete-branch: true
           commit-message: ${{ env.COMMIT_MESSAGE }}
           sign-commits: ${{ case(env.SIGN_COMMITS == 'true', false, true) }}
@@ -401,7 +420,8 @@ jobs:
 
       - name: |-
           ${{ case(env.AUTO_COMMIT == 'false',
-            format('PR Result: {0}', case(steps.pull-request.outputs.pull-request-number, 'Created', 'Not Necessary')),
+            format('PR Result: {0}',
+              case(steps.pull-request.outputs.pull-request-number, 'Created', 'Not Necessary')),
             'Skipped: Uses Commits') }}
         if: ${{ success() && steps.pull-request.outcome == 'success' }}
         run: echo "PR Result!"

@@ -35,7 +35,7 @@ permissions:
 
 jobs:
   build_jekyll:
-    uses: theantiscamgroup/workflows/.github/workflows/build_jekyll.yml@main
+    uses: socksthewolf/workflows/.github/workflows/build_jekyll.yml@main
     secrets: inherit
     with:
       force_clear: ${{ inputs.clear_cache == true || github.event_name == 'schedule' }}

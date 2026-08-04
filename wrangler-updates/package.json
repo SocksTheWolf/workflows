@@ -11,5 +11,8 @@
     "wrangler": {
       "undici": "^7.29.0"
     }
+  },
+  "custom": {
+    "no_auto_override": true
   }
 }
