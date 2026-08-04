@@ -143,6 +143,8 @@ jobs:
           commit_user_email: ${{ case(env.SIGN_COMMITS == 'true', steps.import-gpg.outputs.email, env.DEFAULT_EMAIL) }}
           # All Commits are Signed
           commit_options: ${{ case(env.SIGN_COMMITS == 'true', '-S', '') }}
+          # Also sign the tags
+          before_tag_hook: ${{ case(env.SIGN_COMMITS == 'true', 'git config tag.gpgsign true', '') }}
 
       - name: |-
           ${{ format('Commit Result: {0}',
