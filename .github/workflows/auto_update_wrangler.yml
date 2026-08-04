@@ -1,4 +1,4 @@
-# Updates all repositories with either the wrangler, auto-deps or cloudflare tag that you own
+# Updates all repositories with either the wrangler, auto-deps or cloudflare tag label that you own
 #
 # This will not work on any repositories that are technically forks, even if forked with the intent to not push back to mainline.
 # The only fix to this is to disconnect from the fork network.

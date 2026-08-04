@@ -12,7 +12,7 @@ Welcome to Insanity.
 
 ### Auto Scripts
 
-There are two auto scripts.
+There are three auto scripts.
 
 - `auto_sync.yml` - Will keep all other forked repos in sync with the base repository.
   - Also cleans up any actions performed on the current repo/fork.
@@ -36,6 +36,8 @@ There are two auto scripts.
     - It's best if you have Cloudflare Workers Pro if you own a lot of repos, as it will trigger all the wrangler builds at once.
       - The max that the free plan can use is 1 build at a time, where as Pro is 6 builds. [See Limits](https://developers.cloudflare.com/workers/ci-cd/builds/limits-and-pricing/).
       - If you don't have Workers Pro, it's advised that you set `AUTO_COMMIT` to `"false"`
+- `auto_update_actions.yml` - Works like the above but for repos that have `github-actions` and `nodejs`.
+  - Pushes new releases
 
 ### Github Secrets
 
@@ -85,7 +87,8 @@ Once done, it may take a little over a day before any scheduled actions run.
 | `clean_deploys.yml` | `clean_deploys` | false | max | N/A |
 | `clear_cache.yml` | `cloudflare_cache` | false | max | cloudflare |
 | `auto_sync.yml` | `autosync` | true | N/A | production |
-| `auto_update_wrangler.yml` | `wrangler` | false | single | tangled, wrangler-update |
+| `auto_update_wrangler.yml` | `wrangler` | false | single | wrangler-update |
+| `auto_update_actions.yml` | `actions` | false | single | wrangler-update |
 
 Max concurrency queueing is 100 jobs.
 

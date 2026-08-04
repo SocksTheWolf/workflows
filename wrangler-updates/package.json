@@ -2,6 +2,7 @@
   "name": "dummynode",
   "type": "module",
   "private": true,
+  "version": "1.0.1",
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260724.1",
     "wrangler": "^4.118.0",
