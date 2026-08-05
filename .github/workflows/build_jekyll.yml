@@ -41,7 +41,13 @@ on:
         description: "If we should execute a shell script after running the build"
         type: boolean
         default: false
-        required: true
+        required: false
+      needs_before_run:
+        description: "If we should execute a shell script before running the build"
+        type: boolean
+        default: false
+        required: false
+
     secrets:
       PERSONAL_TOKEN:
         description: "Passed to the shell via a $TOKEN flag if needs_after_run is true"
@@ -125,6 +131,13 @@ jobs:
         with:
           bundler-cache: true
           cache-version: ${{ inputs.ruby_cache_version }}
+
+      - name: Before Build Execution
+        if: ${{ success() && inputs.needs_before_run == true }}
+        env:
+          TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+        run: bash .github/run_before.sh
+
       - name: Build with Jekyll
         id: build
         # Outputs to the './_site' directory by default
@@ -138,7 +151,7 @@ jobs:
         if: ${{ success() && inputs.needs_after_run == true }}
         env:
           TOKEN: ${{ secrets.PERSONAL_TOKEN }}
-        run: bash .github/run.sh
+        run: bash .github/run_after.sh
 
         # Minimize/Purge any excess CSS rules that are unused
       - name: Purge CSS
