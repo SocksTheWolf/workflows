@@ -144,7 +144,7 @@ jobs:
       DEFAULT_EMAIL: ""
 
       # Should we also update any hono versions that we detect?
-      UPDATE_HONO: "false"
+      UPDATE_HONO: "true"
 
       # Allow for overriding repo keys and stuff
       ADD_OVERRIDES: ${{ needs.get-repos.outputs.add_overrides }}
