@@ -4,8 +4,10 @@
 #
 # * A filter_rules.yml in .github/
 #   * This file must have a rule in it for "clear_cache"
-# * A run.sh in .github/
+# * A (optional) run_after.sh in .github/
 #   * But only if "needs_after_run" is true
+# * A (optional) run_before.sh in .github/
+#   * But only if "needs_before_run" is true
 # * A Github environment named "jekyll" or repo variables that defines:
 #   * secrets:PERSONAL_TOKEN
 #   * secrets:CLOUDFLARE_TOKEN
