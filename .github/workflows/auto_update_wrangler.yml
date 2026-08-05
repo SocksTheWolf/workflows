@@ -211,8 +211,8 @@ jobs:
 
           # Check for Wrangler installs
           echo "Checking for wrangler..."
-          check_wrangler_dev_depends=$(echo "$DEV_DEPENDS" | jq -r ."\"wrangler\"")
-          check_wrangler_depends=$(echo "$DEPENDS" | jq -r ."\"wrangler\"")
+          check_wrangler_dev_depends=$(echo "$DEV_DEPENDS" | jq -r .wrangler)
+          check_wrangler_depends=$(echo "$DEPENDS" | jq -r .wrangler)
           # Check in dev dependencies
           if [[ -n "$check_wrangler_dev_depends" ]] && [[ "$check_wrangler_dev_depends" != null ]]; then
             echo "Has Wrangler"
@@ -238,7 +238,7 @@ jobs:
           fi
 
           # Check for hono installs
-          check_hono_depends=$(echo "$DEPENDS" | jq -r ."\"hono\"")
+          check_hono_depends=$(echo "$DEPENDS" | jq -r .hono)
           if [[ -n "$check_hono_depends" ]] && [[ "$check_hono_depends" != null ]]; then
             echo "Has Hono"
             echo "has_hono=true" >> "$GITHUB_OUTPUT"
@@ -248,7 +248,7 @@ jobs:
           fi
 
           # Check to see if we should skip the package auto overrides
-          check_auto_overrides=$(echo "$CUSTOM_DATA" | jq -r ."\"no_auto_override\"")
+          check_auto_overrides=$(echo "$CUSTOM_DATA" | jq -r .no_auto_override)
           if [[ -n "$check_auto_overrides" ]] && [[ "$check_auto_overrides" != null ]]; then
             echo "Skipping Auto Overrides"
             echo "skip_overrides=true" >> "$GITHUB_OUTPUT"
