@@ -364,7 +364,7 @@ jobs:
           # Install Wrangler or Install Packages
           if [[ "$NEEDS_WRANGLER" == "true" ]]; then
             echo "Installing wrangler latest..."
-            npm install wrangler@latest $WRANGLER_SAVE
+            npm install wrangler@latest --prefer-online $WRANGLER_SAVE
           elif [[ "$HAS_OVERRIDES" == "true" ]]; then
             echo "Installing Packages"
             npm install --ignore-scripts --allow-git=none --save-dev
@@ -373,13 +373,13 @@ jobs:
           # Install Workers Types if needed
           if [[ "$NEEDS_CF_TYPES" == "true" ]]; then
             echo "Install latest CF types..."
-            npm install $WORKERS_TYPES@latest --save-dev
+            npm install $WORKERS_TYPES@latest --save-dev --prefer-online
           fi
 
           # Install the latest Hono if needed
           if [[ "$NEEDS_HONO" == "true" ]]; then
             echo "Install latest Hono"
-            npm install hono@latest --save
+            npm install hono@latest --save --prefer-online
           fi
 
           # Install all other packages and run types if necessary

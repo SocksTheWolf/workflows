@@ -7,7 +7,7 @@
     "@actions/github": "^9.1.1",
     "@actions/http-client": "^4.0.1",
     "@cloudflare/workers-types": "^5.20260724.1",
-    "hono": "4.12.34",
+    "hono": "^4.13.0",
     "wrangler": "^4.118.0"
   },
   "overrides": {
