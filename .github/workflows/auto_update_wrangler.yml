@@ -215,15 +215,18 @@ jobs:
           check_wrangler_depends=$(echo "$DEPENDS" | jq -r .wrangler)
           # Check in dev dependencies
           if [[ -n "$check_wrangler_dev_depends" ]] && [[ "$check_wrangler_dev_depends" != null ]]; then
-            echo "Has Wrangler"
+            echo "Has Wrangler Dev"
+            echo "wrangler_dev=true" >> "$GITHUB_OUTPUT"
             echo "has_wrangler=true" >> "$GITHUB_OUTPUT"
           # Check regular dependencies
           elif [[ -n "$check_wrangler_depends" ]] && [[ "$check_wrangler_depends" != null ]]; then
-            echo "Has Wrangler"
+            echo "Has Wrangler Run"
+            echo "wrangler_dev=false" >> "$GITHUB_OUTPUT"
             echo "has_wrangler=true" >> "$GITHUB_OUTPUT"
           # Doesn't have wrangler then
           else
             echo "Does not have Wrangler"
+            echo "wrangler_dev=false" >> "$GITHUB_OUTPUT"
             echo "has_wrangler=false" >> "$GITHUB_OUTPUT"
           fi
 
@@ -361,7 +364,7 @@ jobs:
           # Install Wrangler or Install Packages
           if [[ "$NEEDS_WRANGLER" == "true" ]]; then
             echo "Installing wrangler latest..."
-            npm install wrangler@latest --save-dev
+            npm install wrangler@latest $WRANGLER_SAVE
           elif [[ "$HAS_OVERRIDES" == "true" ]]; then
             echo "Installing Packages"
             npm install --ignore-scripts --allow-git=none --save-dev
@@ -389,6 +392,7 @@ jobs:
           NEEDS_TYPES_RUN: ${{ steps.pkg_check.outputs.has_types_command == 'true' }}
           NEEDS_CF_TYPES: ${{ steps.pkg_check.outputs.has_cf_types == 'true' }}
           NEEDS_WRANGLER: ${{ steps.pkg_check.outputs.has_wrangler == 'true' }}
+          WRANGLER_SAVE: ${{ case(steps.pkg_check.outputs.wrangler_dev == 'true', '--save-dev', '--save') }}
           NEEDS_HONO: ${{ steps.pkg_check.outputs.has_hono == 'true' && env.UPDATE_HONO == 'true' }}
           HAS_OVERRIDES: |-
             ${{ steps.pkg_check.outputs.skip_overrides != 'true' && (env.ADD_OVERRIDES != '' || env.REMOVE_OVERRIDES != '') }}
