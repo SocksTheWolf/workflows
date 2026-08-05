@@ -238,7 +238,7 @@ jobs:
           fi
 
           # Check for hono installs
-          check_hono_depends=$(echo "$DEV_DEPENDS" | jq -r ."\"hono\"")
+          check_hono_depends=$(echo "$DEPENDS" | jq -r ."\"hono\"")
           if [[ -n "$check_hono_depends" ]] && [[ "$check_hono_depends" != null ]]; then
             echo "Has Hono"
             echo "has_hono=true" >> "$GITHUB_OUTPUT"
