@@ -118,6 +118,9 @@ jobs:
       # The global node version
       GLOBAL_NODE_VERSION: ${{ needs.get-repos.outputs.node_version }}
 
+      # Default flags to use when running npm install
+      DEFAULT_NPM_FLAGS: "--ignore-scripts --allow-git=none --fund=false"
+
       # If we should force all repositories to use a specific version of node
       #
       # NOTE: this will also write .node-version to whatever
@@ -364,30 +367,31 @@ jobs:
           # Install Wrangler or Install Packages
           if [[ "$NEEDS_WRANGLER" == "true" ]]; then
             echo "Installing wrangler latest..."
-            npm install wrangler@latest --prefer-online $WRANGLER_SAVE
+            npm install wrangler@latest --prefer-online $WRANGLER_SAVE $DEFAULT_NPM_FLAGS
           elif [[ "$HAS_OVERRIDES" == "true" ]]; then
             echo "Installing Packages"
-            npm install --ignore-scripts --allow-git=none --save-dev
+            npm install --save-dev $DEFAULT_NPM_FLAGS
           fi
 
           # Install Workers Types if needed
           if [[ "$NEEDS_CF_TYPES" == "true" ]]; then
             echo "Install latest CF types..."
-            npm install $WORKERS_TYPES@latest --save-dev --prefer-online
+            npm install $WORKERS_TYPES@latest --save-dev --prefer-online $DEFAULT_NPM_FLAGS
           fi
 
           # Install the latest Hono if needed
           if [[ "$NEEDS_HONO" == "true" ]]; then
             echo "Install latest Hono"
-            npm install hono@latest --save --prefer-online
+            npm install hono@latest --save --prefer-online $DEFAULT_NPM_FLAGS
           fi
 
           # Install all other packages and run types if necessary
           if [[ "$NEEDS_TYPES_RUN" == "true" ]]; then
             echo "Building types..."
-            npm install --ignore-scripts --allow-git=none && npm run types
+            npm install --silent --no-save $DEFAULT_NPM_FLAGS && npm run types
           fi
         env:
+          DEFAULT_NPM_FLAGS: ${{ env.DEFAULT_NPM_FLAGS }}
           NODE_DIR: ${{ steps.node_directory.outputs.dir }}
           NEEDS_TYPES_RUN: ${{ steps.pkg_check.outputs.has_types_command == 'true' }}
           NEEDS_CF_TYPES: ${{ steps.pkg_check.outputs.has_cf_types == 'true' }}
