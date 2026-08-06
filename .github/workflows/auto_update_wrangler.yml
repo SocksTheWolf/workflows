@@ -259,7 +259,7 @@ jobs:
             echo "Skipping Auto Overrides"
             echo "skip_overrides=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Running Auto Overrides"
+            echo "Running Package Maintenance"
             echo "skip_overrides=false" >> "$GITHUB_OUTPUT"
           fi
         env:
@@ -270,9 +270,9 @@ jobs:
 
         # Look how "cool" this name formatting looks, it's fucking insane.
       - name: |-
-          ${{ format('Maintenance: {0}Auto Package Overrides',
+          ${{ format('Maintenance: {0}Package Overrides',
             case(steps.pkg_check.outputs.skip_overrides == 'true',
-            'Skip ',
+            'Skipping ',
             case(env.ADD_OVERRIDES != '' && env.REMOVE_OVERRIDES != '', 'Add & Remove ',
               format('{0}{1}',
                 case(env.ADD_OVERRIDES != '', 'Add ', ''),
