@@ -73,6 +73,9 @@ jobs:
       has_spec: ${{ steps.spec_check.conclusion == 'success' }}
       uploaded_spec: ${{ steps.upload.conclusion == 'success' }}
     environment: openapi
+    env:
+      # Default flags for NPM install
+      DEFAULT_NPM_FLAGS: "--ignore-scripts --allow-git=none --fund=false --loglevel error"
     steps:
         # Check if we can run
       - name: Error if CF token is missing
@@ -99,7 +102,7 @@ jobs:
 
       - name: Install and Build Spec
         if: ${{ inputs.needs_node == true && steps.node.conclusion == 'success' }}
-        run: npm install --ignore-scripts --allow-git=none && npm run openapi
+        run: npm install --no-save $DEFAULT_NPM_FLAGS && npm run openapi
 
         # Download Existing OpenAPI spec if provided
       - name: If Download but Missing Download URI

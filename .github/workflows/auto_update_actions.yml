@@ -62,6 +62,9 @@ jobs:
       # The commit message. If a Pull Request is being opened, this is the title of the pull request.
       COMMIT_MESSAGE: "Chore: Update Builds"
 
+      # Default flags for NPM install
+      DEFAULT_NPM_FLAGS: "--ignore-scripts --allow-git=none --fund=false --loglevel error"
+
       # If commits should be signed. If true, the commits will show up as whatever's in your GPG key
       # Otherwise, it will be github-actions[bot]
       SIGN_COMMITS: "true"
@@ -106,10 +109,10 @@ jobs:
         uses: socksthewolf/github-action-json@main
 
       - name: Update Builds
-        run: |
-          echo "updating builds"
-          npm install --ignore-scripts --allow-git=none && npm run bundle
-      - name: Get Version
+        run: npm install --no-save $DEFAULT_NPM_FLAGS && npm run bundle
+
+        # Remove quotes from the package version
+      - name: Get Current Package Version
         id: version
         run: |
           version=$(echo $NEW_VERSION | tr -d '"')

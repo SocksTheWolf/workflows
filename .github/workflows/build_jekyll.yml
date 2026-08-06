@@ -98,6 +98,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Jekyll Build
     environment: jekyll
+    env:
+      # Default flags for NPM install
+      DEFAULT_NPM_FLAGS: "--ignore-scripts --allow-git=none --fund=false --loglevel error"
     outputs:
       # path filters is a string output, but booleans are different here
       clear_cache: ${{ steps.filter.outputs.clear_cache == 'true' }}
@@ -125,7 +128,7 @@ jobs:
           package-manager-cache: true
       - name: Node Package Install
         id: node
-        run: npm install --ignore-scripts --allow-git=none
+        run: npm install --no-save $DEFAULT_NPM_FLAGS
 
         # Also set up Ruby to build for Jekyll
       - name: Setup Ruby

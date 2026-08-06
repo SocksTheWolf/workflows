@@ -58,6 +58,9 @@ jobs:
     outputs:
       had_changes: ${{ steps.commit.outputs.changes_detected == 'true' }}
     environment: sitemap
+    env:
+      # Default flags for NPM install
+      DEFAULT_NPM_FLAGS: "--ignore-scripts --allow-git=none --fund=false --loglevel error"
     steps:
         # Grab all files + History
       - name: Checkout
@@ -82,7 +85,7 @@ jobs:
 
         # Install packages
       - name: Install and Build Sitemap
-        run: npm install --ignore-scripts --allow-git=none && npm run sitemap
+        run: npm install --no-save $DEFAULT_NPM_FLAGS && npm run sitemap
 
         # Set up the GPG Key for Signing Commits
       - name: Setup GPG Key

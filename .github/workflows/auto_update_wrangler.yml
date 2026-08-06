@@ -391,7 +391,6 @@ jobs:
             npm install --silent --no-save $DEFAULT_NPM_FLAGS && npm run types
           fi
         env:
-          DEFAULT_NPM_FLAGS: ${{ env.DEFAULT_NPM_FLAGS }}
           NODE_DIR: ${{ steps.node_directory.outputs.dir }}
           NEEDS_TYPES_RUN: ${{ steps.pkg_check.outputs.has_types_command == 'true' }}
           NEEDS_CF_TYPES: ${{ steps.pkg_check.outputs.has_cf_types == 'true' }}
