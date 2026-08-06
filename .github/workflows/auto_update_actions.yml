@@ -103,7 +103,7 @@ jobs:
         # In the future, use this to bump the version numbers
       - name: Read packages.json
         id: package_read
-        uses: socksthewolf/github-action-json@f5b8639eabc0eb63279e4efe8206e8fd5d6bd811
+        uses: socksthewolf/github-action-json@main
 
       - name: Update Builds
         run: |

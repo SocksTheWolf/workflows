@@ -38,7 +38,7 @@ jobs:
     uses: socksthewolf/workflows/.github/workflows/build_jekyll.yml@main
     secrets: inherit
     with:
-      force_clear: ${{ inputs.clear_cache == true || github.event_name == 'schedule' }}
+      force_clear: ${{ inputs.clear_cache == 'true' || github.event_name == 'schedule' }}
       should_clean: true
       needs_after_run: false
       ref: ${{ github.ref }}

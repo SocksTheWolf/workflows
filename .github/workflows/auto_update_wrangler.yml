@@ -194,7 +194,7 @@ jobs:
         # or if it needs workers-types
       - name: Read packages.json
         id: package_read
-        uses: socksthewolf/github-action-json@f5b8639eabc0eb63279e4efe8206e8fd5d6bd811
+        uses: socksthewolf/github-action-json@main
         with:
           path: ${{ steps.node_directory.outputs.pack }}
 
@@ -282,7 +282,7 @@ jobs:
           ${{ success() &&
             steps.pkg_check.outputs.skip_overrides != 'true' &&
               (env.ADD_OVERRIDES != '' || env.REMOVE_OVERRIDES != '') }}
-        uses: socksthewolf/github-action-json@f5b8639eabc0eb63279e4efe8206e8fd5d6bd811
+        uses: socksthewolf/github-action-json@main
         with:
           path: ${{ steps.node_directory.outputs.pack }}
           replaceWith: ${{ env.ADD_OVERRIDES }}
