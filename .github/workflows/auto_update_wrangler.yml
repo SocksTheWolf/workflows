@@ -119,7 +119,7 @@ jobs:
       GLOBAL_NODE_VERSION: ${{ needs.get-repos.outputs.node_version }}
 
       # Default flags to use when running npm install
-      DEFAULT_NPM_FLAGS: "--ignore-scripts --allow-git=none --fund=false"
+      DEFAULT_NPM_FLAGS: "--ignore-scripts --allow-git=none --fund=false --loglevel error"
 
       # If we should force all repositories to use a specific version of node
       #
