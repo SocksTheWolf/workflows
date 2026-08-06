@@ -476,6 +476,6 @@ jobs:
               case(steps.pr.outputs.pull-request-number,
                   format('Created Pull #{0}', steps.pr.outputs.pull-request-number),
               'Not Necessary')),
-            'Skipped: Create Pull Request') }}
+            'Skipped: Uses Direct Commits') }}
         if: ${{ success() && steps.pr.outcome == 'success' && steps.pr.outputs.pull-request-url != '' }}
         run: echo "PR Result!"
