@@ -441,17 +441,19 @@ jobs:
           # All Commits are Signed
           commit_options: ${{ case(env.SIGN_COMMITS == 'true', '-S', '') }}
 
+        # An easy way to look at what the output was of the commit
+        # Task will be skipped if it's disabled, or there are no changes detected
       - name: |-
           ${{ case(env.AUTO_COMMIT == 'true',
           format('Commit Result: {0}',
             case(steps.commit.outputs.changes_detected == 'true', 'Committed', 'No Changes')),
           'Skipped: Uses PRs') }}
-        if: ${{ success() && steps.commit.outcome == 'success' }}
+        if: ${{ success() && steps.commit.outcome == 'success' && steps.commit.outputs.changes_detected == 'true' }}
         run: echo "Commit Result!"
 
       - name: ${{ case(env.AUTO_COMMIT == 'false', 'Doing:', 'Skipping:') }} Create Pull Request
         if: ${{ success() && env.AUTO_COMMIT == 'false' }}
-        id: pull-request
+        id: pr
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
         with:
           token: |-
@@ -467,10 +469,13 @@ jobs:
           body: ${{ env.PR_BODY }}
           branch: "chore/wrangler-update"
 
+        # Same idea with the auto commit, this will only run if it enabled and a pr was made.
       - name: |-
           ${{ case(env.AUTO_COMMIT == 'false',
             format('PR Result: {0}',
-              case(steps.pull-request.outputs.pull-request-number, 'Created', 'Not Necessary')),
-            'Skipped: Uses Commits') }}
-        if: ${{ success() && steps.pull-request.outcome == 'success' }}
+              case(steps.pr.outputs.pull-request-number,
+                  format('Created Pull #{0}', steps.pr.outputs.pull-request-number),
+              'Not Necessary')),
+            'Skipped: Create Pull Request') }}
+        if: ${{ success() && steps.pr.outcome == 'success' && steps.pr.outputs.pull-request-url != '' }}
         run: echo "PR Result!"
