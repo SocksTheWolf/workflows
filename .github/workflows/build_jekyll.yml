@@ -100,7 +100,7 @@ jobs:
     environment: jekyll
     env:
       # Default flags for NPM install
-      DEFAULT_NPM_FLAGS: "--ignore-scripts --allow-git=none --fund=false --loglevel error"
+      DEFAULT_NPM_FLAGS: "--ignore-scripts --allow-git=none --fund=false --loglevel error --omit=optional"
     outputs:
       # path filters is a string output, but booleans are different here
       clear_cache: ${{ steps.filter.outputs.clear_cache == 'true' }}
