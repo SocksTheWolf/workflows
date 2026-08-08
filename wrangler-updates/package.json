@@ -11,10 +11,10 @@
     "wrangler": "^4.118.0"
   },
   "overrides": {
-    "wrangler": {
+    "@actions/github": {
       "undici": "^7.29.0"
     },
-    "@actions/github": {
+    "@actions/http-client": {
       "undici": "^7.29.0"
     }
   },
