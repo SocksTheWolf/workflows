@@ -75,7 +75,7 @@ jobs:
     environment: openapi
     env:
       # Default flags for NPM install
-      DEFAULT_NPM_FLAGS: "--ignore-scripts --allow-git=none --fund=false --loglevel error --omit=optional"
+      DEFAULT_NPM_FLAGS: "--ignore-scripts --allow-git=none --fund=false --loglevel error"
     steps:
         # Check if we can run
       - name: Error if CF token is missing
