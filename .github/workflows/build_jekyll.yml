@@ -169,7 +169,7 @@ jobs:
 
         # Convert jekyll redirects into CF redirects
       - name: Redirect Update
-        uses: socksthewolf/jekyll-cloudflare-redirects@0ca292af046fe1f9b482bed5adb3964c78cf31c3
+        uses: socksthewolf/jekyll-cloudflare-redirects@76cbdc4c9434e01f618ccfb3113032f606c510aa
 
         # Take everything in our runtime and punt it to Cloudflare
         # Upload directory to CF
