@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 7
-    group:
+    groups:
       gh_actions_group:
         patterns: 
           - '*'
