@@ -113,7 +113,7 @@ jobs:
 
         # Check for if we should Clear the Cache at the end of all steps
       - name: Cache Clear Check
-        uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d
         id: filter
         with:
           base: ${{ inputs.ref }}
@@ -169,7 +169,7 @@ jobs:
 
         # Convert jekyll redirects into CF redirects
       - name: Redirect Update
-        uses: socksthewolf/jekyll-cloudflare-redirects@0ca292af046fe1f9b482bed5adb3964c78cf31c3
+        uses: socksthewolf/jekyll-cloudflare-redirects@76cbdc4c9434e01f618ccfb3113032f606c510aa
 
         # Take everything in our runtime and punt it to Cloudflare
         # Upload directory to CF
