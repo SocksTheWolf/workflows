@@ -6,7 +6,7 @@
   "devDependencies": {
     "@actions/github": "^9.1.1",
     "@actions/http-client": "^4.0.1",
-    "@cloudflare/workers-types": "^5.20260808.1",
+    "@cloudflare/workers-types": "^5.20260810.1",
     "hono": "^4.13.0",
     "wrangler": "^4.118.0"
   },
