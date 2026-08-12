@@ -5,9 +5,11 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 7
+    cooldown:
+      default-days: 3
     groups:
       gh_actions_group:
-        patterns: 
+        patterns:
           - '*'
     ignore:
       # ignore ruby as it updates all the time
@@ -25,3 +27,7 @@ updates:
     cooldown:
       default-days: 2
     versioning-strategy: increase
+    groups:
+      npm_updates:
+        patterns:
+          - '*'
