@@ -130,7 +130,7 @@ jobs:
         # If we have the file, upload it to CF API Shield
       - name: Upload Spec to API Shield
         id: upload
-        uses: socksthewolf/cloudflare-upload-spec@4aa5efd32ce6fc898dcb794ccd7e3001568cce10
+        uses: socksthewolf/cloudflare-upload-spec@76a0582d521c4fc25442234a8759775b47565d55
         with:
           zone_id: ${{ vars.CLOUDFLARE_ZONE }}
           api_token: ${{ secrets.CLOUDFLARE_TOKEN }}
