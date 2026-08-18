@@ -37,7 +37,7 @@ jobs:
     environment: cloudflare
     steps:
       - name: Clearing ${{ case(inputs.paths == '', 'Entire Zone', 'Individual Paths') }}
-        uses: Cyb3r-Jak3/action-cloudflare-cache@6ebf798ade84e7ab7da249404e0c3b9aecf54f88
+        uses: Cyb3r-Jak3/action-cloudflare-cache@6c31904633d1f541865d66a9131bedd7ddf4dc7d
         with:
           zone: ${{ vars.CLOUDFLARE_ZONE }}
           api_token: ${{ secrets.CLOUDFLARE_TOKEN }}
