@@ -17,6 +17,8 @@ updates:
       # ignore this because it doesn't have pinned releases and I don't want to check the contents every time
       # it can be removed once the issue is resolved.
       - dependency-name: 'raven-actions/get-repos'
+      # hard forked to an external repo setup.
+      - dependency-name: 'Cyb3r-Jak3/action-cloudflare-cache'
 
   # node updates (it's a fake install to trick dependabot to keep track of wrangler for us)
   - package-ecosystem: "npm"
