@@ -6,9 +6,9 @@
   "devDependencies": {
     "@actions/github": "^9.1.1",
     "@actions/http-client": "^4.0.1",
-    "@cloudflare/workers-types": "^5.20260819.1",
+    "@cloudflare/workers-types": "^5.20260822.1",
     "hono": "^4.13.3",
-    "wrangler": "^4.124.0"
+    "wrangler": "^4.125.0"
   },
   "overrides": {
     "@actions/github": {
