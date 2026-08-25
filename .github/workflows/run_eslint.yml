@@ -6,9 +6,10 @@ on:
         description: "Pass github.ref"
         type: string
         required: true
+      # Not used.
       needs_build:
         type: boolean
-        description: "If 'npm run build' should be executed"
+        description: "Not used"
         required: false
         default: false
 
@@ -38,9 +39,25 @@ jobs:
           npm install
           npm install @microsoft/eslint-formatter-sarif@3.1.0
 
-      - name: Run build
-        if: ${{ inputs.needs_build == 'true' }}
-        run: npm run build
+      - name: Read packages.json
+        id: package_read
+        uses: socksthewolf/github-action-json@main
+        with:
+          path: "package.json"
+
+      - name: Check & Run Build
+        id: pkg_check
+        run: |
+          echo "Check for other tasks to do..."
+          check_script_build=$(echo "$SCRIPT_DATA" | jq -r .build)
+          if [[ -n "$check_script_build" ]] && [[ "$check_script_build" != null ]]; then
+            echo "Has npm run types"
+            npm run build
+          else
+            echo "Does not have npm run types"
+          fi
+        env:
+          SCRIPT_DATA: ${{ steps.package_read.outputs.scripts }}
 
       - name: Run ESLint
         env:
