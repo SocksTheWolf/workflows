@@ -6,12 +6,6 @@ on:
         description: "Pass github.ref"
         type: string
         required: true
-      # Not used.
-      needs_build:
-        type: boolean
-        description: "Not used"
-        required: false
-        default: false
 
 permissions:
   contents: read
