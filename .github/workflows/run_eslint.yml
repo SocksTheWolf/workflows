@@ -45,10 +45,10 @@ jobs:
           echo "Check for other tasks to do..."
           check_script_build=$(echo "$SCRIPT_DATA" | jq -r .build)
           if [[ -n "$check_script_build" ]] && [[ "$check_script_build" != null ]]; then
-            echo "Has npm run types"
+            echo "Has npm run build"
             npm run build
           else
-            echo "Does not have npm run types"
+            echo "Does not need build"
           fi
         env:
           SCRIPT_DATA: ${{ steps.package_read.outputs.scripts }}
@@ -63,7 +63,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload analysis results to GitHub
-        uses: github/codeql-action/upload-sarif@f0489abddd4e5e9dff53ed28a45b1d6f88978a1b
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: eslint-results.sarif
           wait-for-processing: true
