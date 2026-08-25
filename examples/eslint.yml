@@ -1,0 +1,16 @@
+name: Run ESLint Scan
+on:
+  workflow_dispatch:
+  push:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  run:
+    name: Scan
+    uses: socksthewolf/workflows/.github/workflows/run_eslint.yml@main
+    with:
+      ref: ${{ github.ref }}
+      needs_build: false
