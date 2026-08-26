@@ -363,6 +363,8 @@ jobs:
           fi
 
           # Run all node commands
+          # fetch the latest versions
+          npm outdated
 
           # Install Wrangler or Install Packages
           if [[ "$NEEDS_WRANGLER" == "true" ]]; then
