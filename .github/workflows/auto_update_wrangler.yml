@@ -146,8 +146,9 @@ jobs:
       DEFAULT_USERNAME: ${{ github.actor }}
       DEFAULT_EMAIL: ""
 
-      # Should we also update any hono versions that we detect?
+      # Should we also update any other packages that we detect?
       UPDATE_HONO: "true"
+      UPDATE_ESLINT: "true"
 
       # Allow for overriding repo keys and stuff
       ADD_OVERRIDES: ${{ needs.get-repos.outputs.add_overrides }}
@@ -253,6 +254,23 @@ jobs:
             echo "has_hono=false" >> "$GITHUB_OUTPUT"
           fi
 
+          # Check eslint
+          check_eslint_depends=$(echo "$OPTIONAL_DEPENDS" | jq -r .eslint)
+          check_ts_eslint_depends=$(echo "$OPTIONAL_DEPENDS" | jq -r .typescript-eslint)
+          if [[ -n "$check_eslint_depends" ]] && [[ "$check_eslint_depends" != null ]]; then
+            echo "Has ESLint"
+            echo "has_eslint=true" >> "$GITHUB_OUTPUT"
+            if [[ -n "$check_ts_eslint_depends" ]] && [[ "$check_ts_eslint_depends" != null ]]; then
+              echo "has_ts_eslint=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "has_ts_eslint=false" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "Does not have ESLint"
+            echo "has_eslint=false" >> "$GITHUB_OUTPUT"
+            echo "has_ts_eslint=false" >> "$GITHUB_OUTPUT"
+          fi
+
           # Check to see if we should skip the package auto overrides
           check_auto_overrides=$(echo "$CUSTOM_DATA" | jq -r .no_auto_override)
           if [[ -n "$check_auto_overrides" ]] && [[ "$check_auto_overrides" != null ]]; then
@@ -266,6 +284,7 @@ jobs:
           SCRIPT_DATA: ${{ steps.package_read.outputs.scripts }}
           DEV_DEPENDS: ${{ steps.package_read.outputs.devDependencies }}
           DEPENDS: ${{ steps.package_read.outputs.dependencies }}
+          OPTIONAL_DEPENDS: ${{ steps.package_read.outputs.optionalDependencies }}
           CUSTOM_DATA: ${{ steps.package_read.outputs.custom }}
 
         # Look how "cool" this name formatting looks, it's fucking insane.
@@ -360,45 +379,75 @@ jobs:
           if [[ -n "$NODE_DIR" ]]; then
             echo "moved directory to $NODE_DIR"
             cd $NODE_DIR
+            echo "---"
           fi
 
           # Run all node commands
 
           # going to try this to force cache breaks
-          npm ci --silent
+          npm ci --silent $DEFAULT_NPM_FLAGS
           npm outdated || true
+          echo "---"
 
           # Install Wrangler or Install Packages
           if [[ "$NEEDS_WRANGLER" == "true" ]]; then
             echo "Installing wrangler latest..."
             npm install wrangler@latest --prefer-online $WRANGLER_SAVE $DEFAULT_NPM_FLAGS
+            echo "---"
           elif [[ "$HAS_OVERRIDES" == "true" ]]; then
             echo "Installing Packages"
             npm install --save-dev $DEFAULT_NPM_FLAGS
+            echo "---"
           fi
 
           # Install Workers Types if needed
           if [[ "$NEEDS_CF_TYPES" == "true" ]]; then
             echo "Install latest CF types..."
             npm install $WORKERS_TYPES@latest --save-dev --prefer-online $DEFAULT_NPM_FLAGS
+            echo "---"
+          fi
+
+          # Install the latest ESLint if needed
+          if [[ "$NEEDS_ESLINT" == "true" ]]; then
+            echo "Installing latest eslint"
+            npm install eslint@latest @eslint/js@latest globals@latest jiti@latest --save-optional --prefer-online $DEFAULT_NPM_FLAGS
+            echo "---"
+          fi
+
+          # Install latest typescript eslint
+          if [[ "$NEEDS_TYPESCRIPT_ESLINT" == "true" ]]; then
+            echo "Installing latest eslint typescript"
+            npm install typescript-eslint@latest --save-optional --prefer-online $DEFAULT_NPM_FLAGS
+            echo "---"
           fi
 
           # Install the latest Hono if needed
           if [[ "$NEEDS_HONO" == "true" ]]; then
             echo "Install latest Hono"
             npm install hono@latest --save --prefer-online $DEFAULT_NPM_FLAGS
+            echo "---"
+          fi
+
+          # Install latest Hono config if needed
+          if [[ "$NEEDS_HONO" == "true" ]] and [[ "$NEEDS_ESLINT" == "true" ]]; then
+            echo "Installing latest Hono ESlint Configs"
+            npm install @hono/eslint-config@latest --save-optional --prefer-online $DEFAULT_NPM_FLAGS
+            echo "---"
           fi
 
           # Install all other packages and run types if necessary
           if [[ "$NEEDS_TYPES_RUN" == "true" ]]; then
             echo "Building types..."
             npm run types
+            echo "---"
           fi
         env:
           NODE_DIR: ${{ steps.node_directory.outputs.dir }}
           NEEDS_TYPES_RUN: ${{ steps.pkg_check.outputs.has_types_command == 'true' }}
           NEEDS_CF_TYPES: ${{ steps.pkg_check.outputs.has_cf_types == 'true' }}
           NEEDS_WRANGLER: ${{ steps.pkg_check.outputs.has_wrangler == 'true' }}
+          NEEDS_ESLINT: ${{ steps.pkg_check.outputs.has_eslint == 'true' && env.UPDATE_ESLINT == 'true' }}
+          NEEDS_TYPESCRIPT_ESLINT: ${{ steps.pkg_check.outputs.has_ts_eslint == 'true' && env.UPDATE_ESLINT == 'true' }}
           WRANGLER_SAVE: ${{ case(steps.pkg_check.outputs.wrangler_dev == 'true', '--save-dev', '--save') }}
           NEEDS_HONO: ${{ steps.pkg_check.outputs.has_hono == 'true' && env.UPDATE_HONO == 'true' }}
           HAS_OVERRIDES: |-
@@ -453,7 +502,7 @@ jobs:
             case(steps.commit.outputs.changes_detected == 'true', 'Committed', 'No Changes')),
           'Skipped: Uses PRs') }}
         if: ${{ success() && steps.commit.outcome == 'success' && steps.commit.outputs.changes_detected == 'true' }}
-        run: echo "Commit Result!"
+        run: echo "Committed"
 
       - name: ${{ case(env.AUTO_COMMIT == 'false', 'Doing:', 'Skipping:') }} Create Pull Request
         if: ${{ success() && env.AUTO_COMMIT == 'false' }}

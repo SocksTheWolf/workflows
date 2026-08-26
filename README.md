@@ -27,6 +27,7 @@ There are three auto scripts.
     - Package overrides (if specified)
       - See `README.md` in `wrangler-updates` for details.
     - Hono (if enabled)
+    - ESLint (if enabled)
   - **Notes**:
     - There's a maximum of ~256 repos that can be updated at once.
     - This action will skip any forks, even if your fork is ahead. This is just how Github works. You must leave the fork network otherwise.
