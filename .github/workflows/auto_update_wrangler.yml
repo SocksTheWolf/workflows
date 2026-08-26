@@ -429,7 +429,7 @@ jobs:
           fi
 
           # Install latest Hono config if needed
-          if [[ "$NEEDS_HONO" == "true" ]] and [[ "$NEEDS_ESLINT" == "true" ]]; then
+          if [[ "$NEEDS_HONO" == "true" ]] && [[ "$NEEDS_ESLINT" == "true" ]]; then
             echo "Installing latest Hono ESlint Configs"
             npm install @hono/eslint-config@latest --save-optional --prefer-online $DEFAULT_NPM_FLAGS
             echo "---"
