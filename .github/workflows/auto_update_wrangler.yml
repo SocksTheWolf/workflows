@@ -256,7 +256,7 @@ jobs:
 
           # Check eslint
           check_eslint_depends=$(echo "$OPTIONAL_DEPENDS" | jq -r .eslint)
-          check_ts_eslint_depends=$(echo "$OPTIONAL_DEPENDS" | jq -r ."typescript-eslint")
+          check_ts_eslint_depends=$(echo "$OPTIONAL_DEPENDS" | jq -r ."\"typescript-eslint"\")
           if [[ -n "$check_eslint_depends" ]] && [[ "$check_eslint_depends" != null ]]; then
             echo "Has ESLint"
             echo "has_eslint=true" >> "$GITHUB_OUTPUT"
