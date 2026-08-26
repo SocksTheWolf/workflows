@@ -350,7 +350,7 @@ jobs:
           cache: "npm"
           cache-dependency-path: ${{ steps.node_directory.outputs.lock }}
           node-version-file: ${{ steps.node_directory.outputs.ver }}
-          package-manager-cache: true
+          package-manager-cache: false
 
       - name: |-
           Install Updates ${{ case(steps.pkg_check.outputs.has_types_command == 'true', '& Build Types', '') }}
@@ -366,7 +366,7 @@ jobs:
 
           # going to try this to force cache breaks
           npm ci --silent
-          npm outdated
+          npm outdated || true
 
           # Install Wrangler or Install Packages
           if [[ "$NEEDS_WRANGLER" == "true" ]]; then
