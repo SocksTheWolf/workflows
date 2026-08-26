@@ -363,7 +363,9 @@ jobs:
           fi
 
           # Run all node commands
-          # fetch the latest versions
+
+          # going to try this to force cache breaks
+          npm ci --silent
           npm outdated
 
           # Install Wrangler or Install Packages
@@ -390,7 +392,7 @@ jobs:
           # Install all other packages and run types if necessary
           if [[ "$NEEDS_TYPES_RUN" == "true" ]]; then
             echo "Building types..."
-            npm install --silent --no-save $DEFAULT_NPM_FLAGS && npm run types
+            npm run types
           fi
         env:
           NODE_DIR: ${{ steps.node_directory.outputs.dir }}
