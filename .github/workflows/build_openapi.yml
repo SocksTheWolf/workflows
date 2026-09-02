@@ -78,7 +78,7 @@ jobs:
       DEFAULT_NPM_FLAGS: "--ignore-scripts --allow-git=none --fund=false --loglevel error"
     steps:
         # Check if we can run
-      - name: Error if CF token is missing
+      - name: Check for CF Token
         id: token
         env:
           token_check: ${{ secrets.CLOUDFLARE_TOKEN }}
@@ -115,7 +115,7 @@ jobs:
           DOWNLOAD_URL: ${{ inputs.download_uri }}
 
         # Check to see that we have the openapi file at all
-      - name: Check If File Exists
+      - name: Check OpenAPI Spec File Exists
         id: spec_check
         run: |
           echo "Check for openapi.json file"
@@ -130,11 +130,16 @@ jobs:
         # If we have the file, upload it to CF API Shield
       - name: Upload Spec to API Shield
         id: upload
+        continue-on-error: true
         uses: socksthewolf/cloudflare-upload-spec@4991fcec93d269456b755f24bdd95af7e4fca06a
         with:
           zone_id: ${{ vars.CLOUDFLARE_ZONE }}
           api_token: ${{ secrets.CLOUDFLARE_TOKEN }}
           delete_others: true
+
+      - name: Prettify Spec
+        if: ${{ inputs.needs_node == true }}
+        run: npx prettier openapi.json --write --ignore-path=""
 
         # Additionally, save it to our GH artifacts
       - name: Upload Spec as Artifact
