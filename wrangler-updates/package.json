@@ -6,9 +6,9 @@
   "devDependencies": {
     "@actions/github": "^9.1.1",
     "@actions/http-client": "^4.0.1",
-    "@cloudflare/workers-types": "^5.20260826.1",
+    "@cloudflare/workers-types": "^5.20260831.1",
     "hono": "^4.13.5",
-    "wrangler": "^4.126.0"
+    "wrangler": "^4.127.1"
   },
   "optionalDependencies": {
     "@eslint/js": "^10.0.1",
