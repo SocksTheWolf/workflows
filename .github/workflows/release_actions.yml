@@ -1,0 +1,157 @@
+# Makes releases for the given repository
+#
+# It is recommended to have an environment named wrangler-update,
+# but you can also just set it in the repository secrets
+#
+# The following secrets should be created:
+#   * GPG_PASSPHRASE - For auto commits, that are signed.
+#   * GPG_PRIVATE_KEY - For auto commits, on signing.
+
+name: Push Actions Release
+on:
+  workflow_call:
+    secrets:
+      GPG_PASSPHRASE:
+        required: false
+      GPG_PRIVATE_KEY:
+        required: false
+    inputs:
+      commit_message:
+        type: string
+        default: "Build Update"
+        required: false
+
+      sign_commits:
+        description: "If build commits should be signed"
+        type: boolean
+        default: true
+        required: false
+
+      commit_username:
+        type: string
+        description: "The user name when making commits (only if sign_commits is false)"
+        default: ${{ github.actor }}
+        required: false
+
+      commit_email:
+        type: string
+        description: "The email to use when making commits (only if sign_commits is false)"
+        default: ""
+        required: false
+
+# Probably could consolidate the bash scripts, but w/e
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: actions
+  cancel-in-progress: false
+  queue: single
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-release-action:
+    name: Make Release
+    runs-on: ubuntu-latest
+    environment: wrangler-update
+
+    # Actual Config Settings
+    env:
+      # The commit message. If a Pull Request is being opened, this is the title of the pull request.
+      COMMIT_MESSAGE: ${{ inputs.commit_message }}
+
+      # Default flags for NPM install
+      DEFAULT_NPM_FLAGS: "--ignore-scripts --allow-git=none --fund=false --loglevel error --omit=optional"
+
+      # If commits should be signed. If true, the commits will show up as whatever's in your GPG key
+      # Otherwise, it will be github-actions[bot]
+      SIGN_COMMITS: ${{ inputs.sign_commits }}
+
+      # These are unused if SIGN_COMMITS == 'true'
+      DEFAULT_USERNAME: ${{ inputs.commit_username }}
+      DEFAULT_EMAIL: ${{ inputs.commit_email }}
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: true
+
+      - name: Node Install
+        id: node
+        uses: actions/setup-node@v7
+        with:
+          cache: "npm"
+          cache-dependency-path: "package-lock.json"
+          node-version-file: ".node-version"
+          package-manager-cache: true
+
+      - name: Bump Versions
+        run: |-
+          echo "Bumping current build version"
+          npm version patch --no-git-tag-version
+
+        # In the future, use this to bump the version numbers
+      - name: Read packages.json
+        id: package_read
+        uses: socksthewolf/github-action-json@main
+
+      - name: Update Builds
+        run: npm install --no-save $DEFAULT_NPM_FLAGS && npm run bundle
+
+        # Remove quotes from the package version
+      - name: Get Current Package Version
+        id: version
+        run: |
+          version=$(echo $NEW_VERSION | tr -d '"')
+          echo version=$version >> "$GITHUB_OUTPUT"
+        env:
+          NEW_VERSION: ${{ steps.package_read.outputs.version }}
+
+        # Set up the GPG Key for Signing Commits
+      - name: ${{ case(env.SIGN_COMMITS == 'true', 'Doing:', 'Skipping:') }} Setup GPG Key
+        id: import-gpg
+        if: ${{ env.SIGN_COMMITS == 'true' }}
+        uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+
+      - name: Commit Files
+        id: commit
+        uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d
+        with:
+          tag_name: ${{ format('v{0}', steps.version.outputs.version )}}
+          commit_message: ${{ env.COMMIT_MESSAGE }}
+          commit_author: |-
+            ${{ case(env.SIGN_COMMITS == 'true',
+              format('{0} <{1}>', steps.import-gpg.outputs.name, steps.import-gpg.outputs.email),
+              format('{0} <{1}>', env.DEFAULT_USERNAME, env.DEFAULT_EMAIL)
+            ) }}
+          commit_user_name: ${{ case(env.SIGN_COMMITS == 'true', steps.import-gpg.outputs.name, env.DEFAULT_USERNAME) }}
+          commit_user_email: ${{ case(env.SIGN_COMMITS == 'true', steps.import-gpg.outputs.email, env.DEFAULT_EMAIL) }}
+          # All Commits are Signed
+          commit_options: ${{ case(env.SIGN_COMMITS == 'true', '-S', '') }}
+          # Also sign the tags
+          before_tag_hook: ${{ case(env.SIGN_COMMITS == 'true', 'git config tag.gpgsign true', '') }}
+
+      - name: |-
+          ${{ format('Commit Result: {0}',
+            case(steps.commit.outputs.changes_detected == 'true', 'Committed', 'No Changes')) }}
+        if: ${{ success() && steps.commit.outcome == 'success' }}
+        run: echo "Commit Result!"
+
+      - name: Make Release
+        if: ${{ steps.commit.outcome == 'success' }}
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64
+        with:
+          overwrite_files: false
+          tag_name: ${{ format('v{0}', steps.version.outputs.version )}}
+          body: "Updated Actions Build"
+          generate_release_notes: true
