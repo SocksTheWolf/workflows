@@ -464,7 +464,7 @@ jobs:
           fi
           npm install
         env:
-          path: ${{ steps.node_directory.outputs.pack }}
+          NODE_DIR: ${{ steps.node_directory.outputs.dir }}
 
         # Set up the GPG Key for Signing Commits
       - name: ${{ case(env.SIGN_COMMITS == 'true', 'Doing:', 'Skipping:') }} Setup GPG Key
