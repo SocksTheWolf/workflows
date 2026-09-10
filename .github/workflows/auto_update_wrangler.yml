@@ -287,26 +287,6 @@ jobs:
           OPTIONAL_DEPENDS: ${{ steps.package_read.outputs.optionalDependencies }}
           CUSTOM_DATA: ${{ steps.package_read.outputs.custom }}
 
-        # Look how "cool" this name formatting looks, it's fucking insane.
-      - name: |-
-          ${{ format('Maintenance: {0}Package Overrides',
-            case(steps.pkg_check.outputs.skip_overrides == 'true',
-            'Skipping ',
-            case(env.ADD_OVERRIDES != '' && env.REMOVE_OVERRIDES != '', 'Add & Remove ',
-              format('{0}{1}',
-                case(env.ADD_OVERRIDES != '', 'Add ', ''),
-                case(env.REMOVE_OVERRIDES != '', 'Remove ', ''))))) }}
-        # It also has an overencumbered if statement too~!
-        if: |
-          ${{ success() &&
-            steps.pkg_check.outputs.skip_overrides != 'true' &&
-              (env.ADD_OVERRIDES != '' || env.REMOVE_OVERRIDES != '') }}
-        uses: socksthewolf/github-action-json@main
-        with:
-          path: ${{ steps.node_directory.outputs.pack }}
-          replaceWith: ${{ env.ADD_OVERRIDES }}
-          removeKeys: ${{ env.REMOVE_OVERRIDES }}
-
       - name: |-
           ${{ format('Node: Check{0}Version',
             case(env.FORCE_NODE_VERSION == 'true', ' & Update Any ', ' ')) }}
@@ -452,6 +432,39 @@ jobs:
           NEEDS_HONO: ${{ steps.pkg_check.outputs.has_hono == 'true' && env.UPDATE_HONO == 'true' }}
           HAS_OVERRIDES: |-
             ${{ steps.pkg_check.outputs.skip_overrides != 'true' && (env.ADD_OVERRIDES != '' || env.REMOVE_OVERRIDES != '') }}
+
+        # Look how "cool" this name formatting looks, it's fucking insane.
+      - name: |-
+          ${{ format('Maintenance: {0}Package Overrides',
+            case(steps.pkg_check.outputs.skip_overrides == 'true',
+            'Skipping ',
+            case(env.ADD_OVERRIDES != '' && env.REMOVE_OVERRIDES != '', 'Add & Remove ',
+              format('{0}{1}',
+                case(env.ADD_OVERRIDES != '', 'Add ', ''),
+                case(env.REMOVE_OVERRIDES != '', 'Remove ', ''))))) }}
+        # It also has an overencumbered if statement too~!
+        if: |
+          ${{ success() &&
+            steps.pkg_check.outputs.skip_overrides != 'true' &&
+              (env.ADD_OVERRIDES != '' || env.REMOVE_OVERRIDES != '') }}
+        uses: socksthewolf/github-action-json@main
+        with:
+          path: ${{ steps.node_directory.outputs.pack }}
+          replaceWith: ${{ env.ADD_OVERRIDES }}
+          removeKeys: ${{ env.REMOVE_OVERRIDES }}
+
+      - name: Sync Package Files
+        run: |
+          echo "Running Package Override Cleanup..."
+          # Move to the correct working directory
+          if [[ -n "$NODE_DIR" ]]; then
+            echo "moved directory to $NODE_DIR"
+            cd $NODE_DIR
+            echo "---"
+          fi
+          npm install
+        env:
+          path: ${{ steps.node_directory.outputs.pack }}
 
         # Set up the GPG Key for Signing Commits
       - name: ${{ case(env.SIGN_COMMITS == 'true', 'Doing:', 'Skipping:') }} Setup GPG Key
