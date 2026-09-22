@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run
-        uses: igorjs/gh-actions-clean-workflow@5fa2e3a4fdd40e3e7098645a0b8df08624352e5e
+        uses: igorjs/gh-actions-clean-workflow@b910eb365da5e592d865ddd8a72d01cbd720b3b1
         id: clean
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
