@@ -6,14 +6,14 @@
   "devDependencies": {
     "@actions/github": "^9.1.1",
     "@actions/http-client": "^4.0.1",
-    "@cloudflare/workers-types": "^5.20260908.1",
-    "hono": "^4.13.7",
-    "wrangler": "^4.130.0"
+    "@cloudflare/workers-types": "^5.20260919.1",
+    "hono": "^4.13.8",
+    "wrangler": "^4.135.0"
   },
   "optionalDependencies": {
     "@eslint/js": "^10.0.1",
     "@hono/eslint-config": "^2.1.1",
-    "eslint": "^10.10.0",
+    "eslint": "^10.11.0",
     "globals": "^17.12.0",
     "jiti": "^2.7.0",
     "typescript-eslint": "^8.70.0"
