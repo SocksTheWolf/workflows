@@ -6,9 +6,9 @@
   "devDependencies": {
     "@actions/github": "^9.1.1",
     "@actions/http-client": "^4.0.1",
-    "@cloudflare/workers-types": "^5.20260919.1",
+    "@cloudflare/workers-types": "^5.20260923.1",
     "hono": "^4.13.8",
-    "wrangler": "^4.135.0"
+    "wrangler": "^4.136.3"
   },
   "optionalDependencies": {
     "@eslint/js": "^10.0.1",
@@ -16,7 +16,7 @@
     "eslint": "^10.11.0",
     "globals": "^17.12.0",
     "jiti": "^2.7.0",
-    "typescript-eslint": "^8.70.0"
+    "typescript-eslint": "^8.70.1"
   },
   "overrides": {
     "@actions/github": {
