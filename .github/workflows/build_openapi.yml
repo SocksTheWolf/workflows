@@ -27,11 +27,16 @@ on:
       download_uri:
         description: "If the spec is a download, where can the download be found"
         type: string
-        default: ""
+        default: ''
       clean_deploys:
         description: "If we should clear all previous deployments of this action"
         type: boolean
         default: false
+      zone_id:
+        description: "The cloudflare zone to use"
+        default: ''
+        type: string
+        required: false
     secrets:
       CLOUDFLARE_TOKEN:
         description: "A Cloudflare API Token with Domain API Gateway Edit Support"
@@ -133,7 +138,7 @@ jobs:
         continue-on-error: true
         uses: socksthewolf/cloudflare-upload-spec@4991fcec93d269456b755f24bdd95af7e4fca06a
         with:
-          zone_id: ${{ vars.CLOUDFLARE_ZONE }}
+          zone_id: ${{ case(inputs.zone_id == '', vars.CLOUDFLARE_ZONE, inputs.zone_id) }}
           api_token: ${{ secrets.CLOUDFLARE_TOKEN }}
           delete_others: true
 
