@@ -8,7 +8,7 @@
     "@actions/http-client": "^4.0.1",
     "@cloudflare/workers-types": "^5.20260919.1",
     "hono": "^4.13.8",
-    "wrangler": "^4.135.0"
+    "wrangler": "^4.147.0"
   },
   "optionalDependencies": {
     "@eslint/js": "^10.0.1",
