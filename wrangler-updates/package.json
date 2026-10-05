@@ -6,17 +6,17 @@
   "devDependencies": {
     "@actions/github": "^9.1.1",
     "@actions/http-client": "^4.0.1",
-    "@cloudflare/workers-types": "^5.20260919.1",
-    "hono": "^4.13.8",
-    "wrangler": "^4.135.0"
+    "@cloudflare/workers-types": "^5.20261003.1",
+    "hono": "^4.13.12",
+    "wrangler": "^4.147.0"
   },
   "optionalDependencies": {
     "@eslint/js": "^10.0.1",
     "@hono/eslint-config": "^2.1.1",
-    "eslint": "^10.11.0",
-    "globals": "^17.12.0",
+    "eslint": "^10.12.0",
+    "globals": "^17.13.0",
     "jiti": "^2.7.0",
-    "typescript-eslint": "^8.70.0"
+    "typescript-eslint": "^8.71.0"
   },
   "overrides": {
     "@actions/github": {
