@@ -8,7 +8,7 @@
     "@actions/http-client": "^4.0.1",
     "@cloudflare/workers-types": "^5.20261006.1",
     "hono": "^4.13.13",
-    "wrangler": "^4.148.0"
+    "wrangler": "^4.149.0"
   },
   "optionalDependencies": {
     "@eslint/js": "^10.0.1",
@@ -24,9 +24,6 @@
     },
     "@actions/http-client": {
       "undici": "^7.29.1"
-    },
-    "miniflare": {
-      "sharp": "0.35.5"
     }
   },
   "custom": {
