@@ -19,6 +19,8 @@ updates:
       - dependency-name: 'raven-actions/get-repos'
       # hard forked to an external repo setup.
       - dependency-name: 'Cyb3r-Jak3/action-cloudflare-cache'
+      # not enough time to check the changes
+      - dependency-name: 'igorjs/gh-actions-clean-workflow'
 
   # node updates (it's a fake install to trick dependabot to keep track of wrangler for us)
   - package-ecosystem: "npm"
