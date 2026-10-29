@@ -98,7 +98,7 @@ jobs:
         # In the future, use this to bump the version numbers
       - name: Read packages.json
         id: package_read
-        uses: socksthewolf/github-action-json@main
+        uses: socksthewolf/github-action-json@16bc21c07e9d1742439f43d3060f2debce83b247
 
       - name: Update Builds
         run: npm install --no-save $DEFAULT_NPM_FLAGS && npm run bundle

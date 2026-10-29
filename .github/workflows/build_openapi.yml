@@ -136,7 +136,7 @@ jobs:
       - name: Upload Spec to API Shield
         id: upload
         continue-on-error: true
-        uses: socksthewolf/cloudflare-upload-spec@4991fcec93d269456b755f24bdd95af7e4fca06a
+        uses: socksthewolf/cloudflare-upload-spec@14518005b15faec17167e16fd67c01768b064746
         with:
           zone_id: ${{ case(inputs.zone_id == '', vars.CLOUDFLARE_ZONE, inputs.zone_id) }}
           api_token: ${{ secrets.CLOUDFLARE_TOKEN }}

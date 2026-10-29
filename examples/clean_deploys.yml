@@ -1,0 +1,15 @@
+name: Clean GH Deploys
+on:
+  workflow_dispatch:
+  push:
+    branches: "main"
+
+permissions:
+  deployments: write
+
+jobs:
+  run:
+    name: Cleanup
+    uses: socksthewolf/workflows/.github/workflows/clean_deploys.yml@main
+    with:
+      environment: main
